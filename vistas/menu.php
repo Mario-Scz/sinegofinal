@@ -2,7 +2,7 @@
 $pageTitle = 'Menu Principal';
 session_start();
 // puede permitir acceso sin login, o redirigir según necesidad
-if (empty($_SESSION['usuario'])) {
+if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
     header('Location: /vistas/register.php');
     exit;
 }

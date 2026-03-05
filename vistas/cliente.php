@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'Clientes';
 session_start();
-if (empty($_SESSION['usuario'])) {
+if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
     header('Location: /vistas/register.php');
     exit;
 }
