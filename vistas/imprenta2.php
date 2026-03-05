@@ -1,12 +1,19 @@
+<?php
+$pageTitle = 'Agregar imprenta';
+session_start();
+if (empty($_SESSION['usuario'])) {
+    header('Location: /vistas/register.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Bienvenidos</title>
-    <link rel="stylesheet" href="../css/imprentacss.css">
+    <link rel="stylesheet" href="/css/imprentacss.css">
 </head>
 <body>
-
     <div class="sb">
        <label for="toggle" class="mn">
     <div></div>
@@ -15,30 +22,25 @@
 </label>
 
         <div class="br">
-            <img src="../img/sinego.png" alt="Sinego Logo" />
+            <img src="/img/sinego.png" alt="Sinego Logo" />
         </div>
     </div>
    
-
-
     <div class="mc">
 <div class="tb">
-        <a href="imp add.html"><button class="ban">Añadir</button></a>
+        <a href="/vistas/imp add.php"><button class="ban">Añadir</button></a>
     </div>
         <div class="ti">
-            <img src="../img/caja.png" class="ct" alt="caja" />
+            <img src="/img/caja.png" class="ct" alt="caja" />
             <h1>IMPRENTA</h1>
         </div>
-        
-
-
-        
+           
         <div class="c">
              <div class="bs">
     <input type="text" placeholder="Buscar...">
 
     <button class="bi">
-        <img src="../img/busqueda.png" alt="buscar" />
+        <img src="/img/busqueda.png" alt="buscar" />
     </button>
 </div>
 <div class="tc">
@@ -89,22 +91,15 @@
     </table>
  <div class="at">
         <button class="bi">
-            <img src="../img/BASURA.PNG" alt="eliminar" />
+            <img src="/img/BASURA.PNG" alt="eliminar" />
         </button>
 
         <button class="bi">
-            <img src="../img/lapiz.png" alt="editar" />
+            <img src="/img/lapiz.png" alt="editar" />
         </button>
     </div>
-
-
         </div>
 </div>
     </div>
-    
-
 </body>
 </html>
-
-
-
