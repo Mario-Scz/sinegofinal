@@ -259,7 +259,7 @@ body {
 
 .bp:hover {
     background-color: #155f5c;
-    transfrm: translateY(-2px);
+    transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(29, 120, 116, 0.3);
 }
 
@@ -270,7 +270,7 @@ body {
 
 .bs:hover {
     background-color: #d0d0d0;
-    transfrm: translateY(-2px);
+    transform: translateY(-2px);
 }
 
 /* ftr */
@@ -365,15 +365,3 @@ body {
         padding: 20px;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
