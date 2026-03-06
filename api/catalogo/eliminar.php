@@ -1,23 +1,17 @@
 <?php
-header('Content-Type: application/json');
-require_once "../../config/db.php";
 
-$input = json_decode(file_get_contents("php://input"), true);
+header("Content-Type: application/json");
+require_once "../conexion.php";
 
-if (!isset($input['id'])) {
-echo json_encode(["error"=>"ID faltante"]);
-exit;
-}
+$data = json_decode(file_get_contents("php://input"), true);
 
-try{
+$id = $data["id"] ?? 0;
 
-$stmt = $pdo->prepare("DELETE FROM catalogo WHERE id=?");
-$stmt->execute([$input['id']]);
+$stmt = $conn->prepare("DELETE FROM catalogo WHERE id=?");
+$stmt->bind_param("i",$id);
 
-echo json_encode(["success"=>true]);
-
-}catch(PDOException $e){
-
-echo json_encode(["error"=>$e->getMessage()]);
-
+if($stmt->execute()){
+    echo json_encode(["success"=>true]);
+}else{
+    echo json_encode(["success"=>false]);
 }

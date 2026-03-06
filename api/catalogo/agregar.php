@@ -1,29 +1,33 @@
 <?php
-header('Content-Type: application/json');
-require_once "../../config/db.php";
 
-$input = json_decode(file_get_contents("php://input"), true);
+header("Content-Type: application/json");
+require_once "../conexion.php";
 
-if (!isset($input['autor'], $input['tipo'], $input['id_libro'])) {
-    echo json_encode(["error" => "Datos incompletos"]);
+$data = json_decode(file_get_contents("php://input"), true);
+
+$codigo = $data["codigo"] ?? "";
+$autor = $data["autor"] ?? "";
+$titulo = $data["titulo"] ?? "";
+$tipo = $data["tipo"] ?? "";
+
+if(!$codigo || !$autor || !$titulo || !$tipo){
+    echo json_encode([
+        "success"=>false,
+        "error"=>"Faltan datos"
+    ]);
     exit;
 }
 
-try {
+$stmt = $conn->prepare("INSERT INTO catalogo (codigo, autor, titulo, tipo) VALUES (?, ?, ?, ?)");
+$stmt->bind_param("ssss", $codigo, $autor, $titulo, $tipo);
 
-$stmt = $pdo->prepare("INSERT INTO catalogo (autor, tipo, id_libro) VALUES (?, ?, ?)");
-
-$stmt->execute([
-    $input['autor'],
-    $input['tipo'],
-    $input['id_libro']
-]);
-
-echo json_encode([
-    "success" => true,
-    "id" => $pdo->lastInsertId()
-]);
-
-} catch (PDOException $e) {
-    echo json_encode(["error" => $e->getMessage()]);
+if($stmt->execute()){
+    echo json_encode([
+        "success"=>true
+    ]);
+}else{
+    echo json_encode([
+        "success"=>false,
+        "error"=>$stmt->error
+    ]);
 }
