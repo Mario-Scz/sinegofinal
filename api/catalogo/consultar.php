@@ -5,10 +5,10 @@ require_once "../conexion.php";
 
 $result = $conn->query("SELECT * FROM catalogo");
 
-$datos = [];
+$libros = [];
 
-while($row = $result->fetch_assoc()){
-    $datos[] = $row;
+while ($row = $result->fetch_assoc()) {
+    $libros[] = $row;
 }
 
-echo json_encode($datos);
+echo json_encode($libros);

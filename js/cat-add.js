@@ -1,43 +1,57 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-const form = document.querySelector(".fm");
+  const form = document.querySelector(".fm");
 
-form.addEventListener("submit", async (e)=>{
+  form.addEventListener("submit", async (e) => {
 
-e.preventDefault();
+    e.preventDefault();
 
-const codigo = document.getElementById("idL").value;
-const autor = document.getElementById("aut").value;
-const titulo = document.getElementById("libro").value;
-const tipo = document.getElementById("tp").value;
+    const codigo = document.getElementById("idL").value.trim();
+    const autor = document.getElementById("aut").value.trim();
+    const titulo = document.getElementById("libro").value.trim();
+    const tipo = document.getElementById("tp").value.trim();
 
-const res = await fetch("/api/catalogo/agregar.php",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-codigo:codigo,
-autor:autor,
-titulo:titulo,
-tipo:tipo
-})
-});
+    if (!codigo || !autor || !titulo || !tipo) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
 
-const data = await res.json();
+    try {
 
-if(data.success){
+      const res = await fetch("/api/catalogo/agregar.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          codigo,
+          autor,
+          titulo,
+          tipo
+        })
+      });
 
-alert("Libro agregado");
+      const data = await res.json();
 
-window.location.href="/vistas/catalogo.php";
+      if (data.success) {
 
-}else{
+        alert("Libro agregado con ID " + data.id);
 
-alert("Error al agregar");
+        form.reset();
 
-}
+      } else {
 
-});
+        alert("Error: " + (data.error || "Desconocido"));
+
+      }
+
+    } catch (err) {
+
+      alert("Error de conexión: " + err.message);
+      console.error(err);
+
+    }
+
+  });
 
 });

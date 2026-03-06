@@ -5,15 +5,15 @@ require_once "../conexion.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$codigo = $data["codigo"] ?? "";
-$autor = $data["autor"] ?? "";
-$titulo = $data["titulo"] ?? "";
-$tipo = $data["tipo"] ?? "";
+$codigo = trim($data["codigo"] ?? "");
+$autor = trim($data["autor"] ?? "");
+$titulo = trim($data["titulo"] ?? "");
+$tipo = trim($data["tipo"] ?? "");
 
-if(!$codigo || !$autor || !$titulo || !$tipo){
+if (!$codigo || !$autor || !$titulo || !$tipo) {
     echo json_encode([
-        "success"=>false,
-        "error"=>"Faltan datos"
+        "success" => false,
+        "error" => "Faltan datos"
     ]);
     exit;
 }
@@ -21,13 +21,14 @@ if(!$codigo || !$autor || !$titulo || !$tipo){
 $stmt = $conn->prepare("INSERT INTO catalogo (codigo, autor, titulo, tipo) VALUES (?, ?, ?, ?)");
 $stmt->bind_param("ssss", $codigo, $autor, $titulo, $tipo);
 
-if($stmt->execute()){
+if ($stmt->execute()) {
     echo json_encode([
-        "success"=>true
+        "success" => true,
+        "id" => $stmt->insert_id
     ]);
-}else{
+} else {
     echo json_encode([
-        "success"=>false,
-        "error"=>$stmt->error
+        "success" => false,
+        "error" => $stmt->error
     ]);
 }

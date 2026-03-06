@@ -1,46 +1,55 @@
 document.addEventListener("DOMContentLoaded", cargarCatalogo);
 
-async function cargarCatalogo(){
+async function cargarCatalogo() {
 
-const res = await fetch("/api/catalogo/consultar.php");
-const data = await res.json();
+  try {
 
-const tabla = document.querySelector("tbody");
+    const res = await fetch("/api/catalogo/consultar.php");
+    const data = await res.json();
 
-tabla.innerHTML="";
+    const tbody = document.querySelector("tbody");
 
-data.forEach(libro =>{
+    tbody.innerHTML = "";
 
-tabla.innerHTML += `
-<tr>
-<td>${libro.codigo}</td>
-<td>${libro.autor}</td>
-<td>${libro.titulo}</td>
-<td>${libro.tipo}</td>
+    data.forEach(libro => {
 
-<td>
-<button onclick="eliminar(${libro.id})">Eliminar</button>
-</td>
+      const tr = document.createElement("tr");
 
-</tr>
-`;
+      tr.innerHTML = `
+        <td data-label="Autor"><input type="text" value="${libro.autor}" /></td>
+        <td data-label="Tipo"><input type="text" value="${libro.tipo}" /></td>
+        <td data-label="ID Libro"><input type="text" value="${libro.codigo}" /></td>
+        <td data-label="Acciones">
+          <div class="ba">
+            <button class="ba d" onclick="eliminarLibro(${libro.id})">🗑️</button>
+          </div>
+        </td>
+      `;
 
-});
+      tbody.appendChild(tr);
+
+    });
+
+  } catch (err) {
+
+    console.error("Error cargando catálogo:", err);
+
+  }
 
 }
 
-async function eliminar(id){
+async function eliminarLibro(id) {
 
-if(!confirm("Eliminar libro?")) return;
+  if (!confirm("¿Eliminar libro?")) return;
 
-await fetch("/api/catalogo/eliminar.php",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({id:id})
-});
+  await fetch("/api/catalogo/eliminar.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ id })
+  });
 
-cargarCatalogo();
+  cargarCatalogo();
 
 }
