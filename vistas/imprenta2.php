@@ -10,13 +10,14 @@ if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Imprenta - Sinego</title>
-<link rel="stylesheet" href="/css/cliente.css">
+<link rel="stylesheet" href="/css/imprentacss.css">
 </head>
 
 <body>
@@ -67,21 +68,7 @@ if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
 </thead>
 
 <tbody id="tablaImprenta">
-<?php while($registro = $resultado->fetch()): ?>
-<tr data-id="<?php echo $registro['id']; ?>">
-<td data-label="ID"><?php echo $registro['id']; ?></td>
-<td data-label="Autor"><input type="text" class="autor" value="<?php echo $registro['autor']; ?>"></td>
-<td data-label="Tipo"><input type="text" class="tipo" value="<?php echo $registro['tipo']; ?>"></td>
-<td data-label="ID Libro"><input type="text" class="idlibro" value="<?php echo $registro['id_libro']; ?>"></td>
-<td data-label="Acciones">
-<div class="ba">
-<button class="ba editar">✏️</button>
-<button class="ba guardar" style="display:none;">💾</button>
-<button class="ba eliminar">🗑️</button>
-</div>
-</td>
-</tr>
-<?php endwhile; ?>
+<!-- Aquí JavaScript insertará los registros -->
 </tbody>
 
 </table>
