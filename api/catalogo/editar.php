@@ -1,31 +1,29 @@
 <?php
-header('Content-Type: application/json');
-require_once "../../config/db.php";
+header("Content-Type: application/json");
 
-$input = json_decode(file_get_contents("php://input"), true);
+$conexion = new mysqli("localhost","root","","sinego");
 
-if (!isset($input['id'], $input['autor'], $input['tipo'], $input['id_libro'])) {
-    echo json_encode(["error"=>"Datos incompletos"]);
+if ($conexion->connect_error) {
+    echo json_encode(["success"=>false]);
     exit;
 }
 
-try {
+$id = $_POST["id"];
+$codigo = $_POST["codigo"];
+$autor = $_POST["autor"];
+$titulo = $_POST["titulo"];
+$tipo = $_POST["tipo"];
 
-$stmt = $pdo->prepare("UPDATE catalogo 
-SET autor=?, tipo=?, id_libro=? 
-WHERE id=?");
+$sql = "UPDATE libros 
+        SET codigo=?, autor=?, titulo=?, tipo=? 
+        WHERE id=?";
 
-$stmt->execute([
-$input['autor'],
-$input['tipo'],
-$input['id_libro'],
-$input['id']
-]);
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("ssssi",$codigo,$autor,$titulo,$tipo,$id);
 
-echo json_encode(["success"=>true]);
-
-} catch(PDOException $e){
-
-echo json_encode(["error"=>$e->getMessage()]);
-
+if($stmt->execute()){
+    echo json_encode(["success"=>true]);
+}else{
+    echo json_encode(["success"=>false]);
 }
+?>
