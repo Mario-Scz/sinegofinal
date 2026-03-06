@@ -2,23 +2,24 @@
 header('Content-Type: application/json');
 require_once "../../config/db.php";
 
-$input = json_decode(file_get_contents('php://input'), true);
-
-if (!$input || !isset($input['id'], $input['usuario'], $input['password'])) {
-    echo json_encode(['error' => 'Datos incompletos']);
-    exit;
-}
+$buscar = $_GET['buscar'] ?? '';
 
 try {
 
-    $stmt = $pdo->prepare("UPDATE usuarios SET usuario = ?, password = ? WHERE id = ?");
-    $stmt->execute([
-        $input['usuario'],
-        $input['password'],
-        $input['id']
-    ]);
+    if ($buscar) {
 
-    echo json_encode(['success' => true]);
+        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario LIKE ?");
+        $stmt->execute(["%$buscar%"]);
+
+    } else {
+
+        $stmt = $pdo->query("SELECT * FROM usuarios ORDER BY id DESC");
+
+    }
+
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($result);
 
 } catch (PDOException $e) {
 

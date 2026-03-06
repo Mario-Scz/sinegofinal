@@ -2,24 +2,26 @@
 header('Content-Type: application/json');
 require_once "../../config/db.php";
 
-$buscar = $_GET['buscar'] ?? '';
+$input = json_decode(file_get_contents('php://input'), true);
+
+if (!$input || !isset($input['usuario'], $input['contraseña'])) {
+    echo json_encode(['error' => 'Datos incompletos']);
+    exit;
+}
 
 try {
 
-    if ($buscar) {
+    $stmt = $pdo->prepare("INSERT INTO usuarios (usuario, contraseña) VALUES (?, ?)");
 
-        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario LIKE ?");
-        $stmt->execute(["%$buscar%"]);
+    $stmt->execute([
+        $input['usuario'],
+        $input['contraseña']
+    ]);
 
-    } else {
-
-        $stmt = $pdo->query("SELECT * FROM usuarios ORDER BY id DESC");
-
-    }
-
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    echo json_encode($result);
+    echo json_encode([
+        'success' => true,
+        'id' => $pdo->lastInsertId()
+    ]);
 
 } catch (PDOException $e) {
 

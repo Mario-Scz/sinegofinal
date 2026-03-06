@@ -4,17 +4,18 @@ require_once "../../config/db.php";
 
 $input = json_decode(file_get_contents('php://input'), true);
 
-if (!$input || !isset($input['usuario'], $input['password'])) {
+if (!$input || !isset($input['usuario'], $input['contraseña'])) {
     echo json_encode(['error' => 'Datos incompletos']);
     exit;
 }
 
 try {
 
-    $stmt = $pdo->prepare("INSERT INTO usuarios (usuario, password) VALUES (?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO usuarios (usuario, contraseña) VALUES (?, ?)");
+
     $stmt->execute([
         $input['usuario'],
-        $input['password']
+        $input['contraseña']
     ]);
 
     echo json_encode([

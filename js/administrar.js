@@ -13,153 +13,176 @@ if(input.type === "password"){
 
 document.addEventListener("DOMContentLoaded", () => {
 
-const tabla = document.getElementById("tablaUsuarios");
-const buscarInput = document.getElementById("buscarUsuario");
+  const tabla = document.getElementById("tablaUsuarios");
+  const buscarInput = document.getElementById("buscarUsuario");
 
-async function cargarUsuarios(query = "") {
+  async function cargarUsuarios(query = "") {
 
-try{
+    try {
 
-const res = await fetch(`/api/usuarios/consultar.php?buscar=${encodeURIComponent(query)}`);
-const data = await res.json();
+      const res = await fetch(`/api/usuarios/consultar.php?buscar=${encodeURIComponent(query)}`);
+      const data = await res.json();
 
-tabla.innerHTML = "";
+      tabla.innerHTML = "";
 
-data.forEach(usuario => {
+      data.forEach(usuario => {
 
-const tr = document.createElement("tr");
+        const tr = document.createElement("tr");
+        tr.dataset.id = usuario.id;
 
-tr.dataset.id = usuario.id;
+        tr.innerHTML = `
+          <td data-label="ID">${usuario.id}</td>
 
-tr.innerHTML = `
-<td>${usuario.id}</td>
+          <td data-label="Usuario">
+            <input type="text" class="usuario" value="${usuario.usuario}">
+          </td>
 
-<td>
-<input type="text" class="usuario" value="${usuario.usuario}">
-</td>
+          <td data-label="Contraseña">
+            <div style="display:flex;gap:6px;">
+              <input type="password" class="contrasena" value="${usuario.contraseña}">
+              <button class="ver">👁</button>
+            </div>
+          </td>
 
-<td>
-<input type="password" class="password" value="${usuario.contraseña}">
-</td>
+          <td data-label="Acciones">
+            <div class="ba">
+              <button class="ba editar">✏️</button>
+              <button class="ba guardar" style="display:none;">💾</button>
+              <button class="ba eliminar">🗑️</button>
+            </div>
+          </td>
+        `;
 
-<td>
-<div class="ba">
-<button class="editar">✏️</button>
-<button class="guardar" style="display:none;">💾</button>
-<button class="eliminar">🗑️</button>
-</div>
-</td>
-`;
+        tabla.appendChild(tr);
 
-tabla.appendChild(tr);
+      });
 
-});
+    } catch (err) {
 
-}catch(err){
+      console.error("Error al cargar usuarios:", err);
 
-console.error("Error cargando usuarios",err);
+    }
 
-}
+  }
 
-}
+  cargarUsuarios();
 
-cargarUsuarios();
+  buscarInput?.addEventListener("input", e => {
+    cargarUsuarios(e.target.value);
+  });
 
-buscarInput?.addEventListener("input",e=>{
+  tabla.addEventListener("click", async e => {
 
-cargarUsuarios(e.target.value);
+    const tr = e.target.closest("tr");
+    if (!tr) return;
 
-});
+    const id = tr.dataset.id;
 
-tabla.addEventListener("click",async e=>{
+    // revelar contraseña
 
-const tr = e.target.closest("tr");
+    if (e.target.classList.contains("ver")) {
 
-if(!tr) return;
+      const input = tr.querySelector(".contrasena");
 
-const id = tr.dataset.id;
+      if (input.type === "password") {
+        input.type = "text";
+      } else {
+        input.type = "password";
+      }
 
-if(e.target.classList.contains("editar")){
+    }
 
-tr.querySelector(".guardar").style.display="inline-block";
-e.target.style.display="none";
+    // editar
 
-}
+    if (e.target.classList.contains("editar")) {
 
-if(e.target.classList.contains("guardar")){
+      tr.querySelector(".guardar").style.display = "inline-block";
+      e.target.style.display = "none";
 
-const usuario = tr.querySelector(".usuario").value.trim();
-const contraseña = tr.querySelector(".contraseña").value.trim();
+    }
 
-try{
+    // guardar
 
-const res = await fetch("/api/usuarios/editar.php",{
+    if (e.target.classList.contains("guardar")) {
 
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({id,usuario,contraseña})
+      const usuario = tr.querySelector(".usuario").value.trim();
+      const contrasena = tr.querySelector(".contrasena").value.trim();
 
-});
+      try {
 
-const data = await res.json();
+        const res = await fetch("/api/usuarios/editar.php", {
 
-if(data.success){
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
 
-alert("Usuario actualizado");
+          body: JSON.stringify({
+            id,
+            usuario,
+            contraseña: contrasena
+          })
 
-tr.querySelector(".editar").style.display="inline-block";
-e.target.style.display="none";
+        });
 
-}else{
+        const data = await res.json();
 
-alert("Error: "+data.error);
+        if (data.success) {
 
-}
+          alert("Usuario actualizado");
 
-}catch(err){
+          tr.querySelector(".editar").style.display = "inline-block";
+          e.target.style.display = "none";
 
-alert("Error de conexión");
-console.error(err);
+        } else {
 
-}
+          alert("Error: " + (data.error || "desconocido"));
 
-}
+        }
 
-if(e.target.classList.contains("eliminar")){
+      } catch (err) {
 
-if(!confirm("¿Eliminar usuario?")) return;
+        alert("Error de conexión: " + err.message);
 
-try{
+      }
 
-const res = await fetch("/api/usuarios/eliminar.php",{
+    }
 
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({id})
+    // eliminar
 
-});
+    if (e.target.classList.contains("eliminar")) {
 
-const data = await res.json();
+      if (!confirm("¿Eliminar usuario?")) return;
 
-if(data.success){
+      try {
 
-tr.remove();
+        const res = await fetch("/api/usuarios/eliminar.php", {
 
-}else{
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
 
-alert("Error: "+data.error);
+          body: JSON.stringify({ id })
 
-}
+        });
 
-}catch(err){
+        const data = await res.json();
 
-alert("Error conexión");
-console.error(err);
+        if (data.success) {
 
-}
+          tr.remove();
 
-}
+        } else {
 
-});
+          alert("Error: " + (data.error || "desconocido"));
+
+        }
+
+      } catch (err) {
+
+        alert("Error de conexión");
+
+      }
+
+    }
+
+  });
 
 });
