@@ -10,9 +10,14 @@ if (!$input || !isset($input['id_libro'], $input['autor'], $input['tipo'])) {
 }
 
 try {
-    $stmt = $pdo->prepare("INSERT INTO imprenta (id_libro, autor, tipo) VALUES (?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO imprenta2 (id_libro, autor, tipo) VALUES (?, ?, ?)");
     $stmt->execute([$input['id_libro'], $input['autor'], $input['tipo']]);
-    echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+
+    echo json_encode([
+        'success' => true,
+        'id' => $pdo->lastInsertId()
+    ]);
+
 } catch (PDOException $e) {
     echo json_encode(['error' => $e->getMessage()]);
 }
