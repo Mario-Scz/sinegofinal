@@ -52,6 +52,6 @@ if (!empty($_SESSION['usuario'])) {
 </main>
 
 <!-- JS del login -->
-<script src="/js/login.js"></script>
+<script src="/js/register.js"></script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
