@@ -1,151 +1,165 @@
-// ============================================
-// administración - gestionar tabla usuarios
-// ============================================
+function togglePassword(btn) {
 
-document.addEventListener('DOMContentLoaded', function() {
-    inicializarGestionAdministracion();
+let input = btn.parentElement.querySelector("input");
+
+if(input.type === "password"){
+    input.type = "text";
+}else{
+    input.type = "password";
+}
+
+}
+// administrar.js
+
+document.addEventListener("DOMContentLoaded", () => {
+
+const tabla = document.getElementById("tablaUsuarios");
+const buscarInput = document.getElementById("buscarUsuario");
+
+async function cargarUsuarios(query = "") {
+
+try{
+
+const res = await fetch(`/api/usuarios/consultar.php?buscar=${encodeURIComponent(query)}`);
+const data = await res.json();
+
+tabla.innerHTML = "";
+
+data.forEach(usuario => {
+
+const tr = document.createElement("tr");
+
+tr.dataset.id = usuario.id;
+
+tr.innerHTML = `
+<td>${usuario.id}</td>
+
+<td>
+<input type="text" class="usuario" value="${usuario.usuario}">
+</td>
+
+<td>
+<input type="password" class="password" value="${usuario.password}">
+</td>
+
+<td>
+<div class="ba">
+<button class="editar">✏️</button>
+<button class="guardar" style="display:none;">💾</button>
+<button class="eliminar">🗑️</button>
+</div>
+</td>
+`;
+
+tabla.appendChild(tr);
+
 });
 
-function inicializarGestionAdministracion() {
-    // Búsqueda de usuarios
-    const inpBus = document.querySelector('.inp-bus');
-    if (inpBus) {
-        inpBus.addEventListener('input', filtrarUsuarios);
-    }
-    
-    // Botones de acción (ediar y eliminar)
-    configurarBotonesAccionAdmin();
-    
-    debug('Gestión de administración inicializada');
+}catch(err){
+
+console.error("Error cargando usuarios",err);
+
 }
 
-// Filtrar usuarios por búsqueda
-function filtrarUsuarios(e) {
-    const termBus = e.target.value.toLowerCase();
-    const rws = document.querySelectorAll('.tab-dat tbody tr');
-    
-    let usuariosVisibles = 0;
-    
-    rws.forEach(row => {
-        const celdas = row.querySelectorAll('td input');
-        let coincide = false;
-        
-        celdas.forEach(celda => {
-            if (celda.value.toLowerCase().includes(termBus)) {
-                coincide = true;
-            }
-        });
-        
-        row.style.display = coincide ? '' : 'none';
-        if (coincide) usuariosVisibles++;
-    });
-    
-    debug(`Búsqueda de usuarios: ${termBus} - ${usuariosVisibles} resultados`);
 }
 
-// Configurar botones de ediar y eliminar
-function configurarBotonesAccionAdmin() {
-    const table = document.querySelector('.tab-dat');
-    if (!table) return;
-    
-    // Botones de ediar
-    const ediButtons = table.querySelectorAll('.bacc.edi');
-    ediButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const row = this.closest('tr');
-            ediarUsuario(row);
-        });
-    });
-    
-    // Botones de eliminar
-    const delButtons = table.querySelectorAll('.bacc.del');
-    delButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const row = this.closest('tr');
-            eliminarUsuario(row);
-        });
-    });
+cargarUsuarios();
+
+buscarInput?.addEventListener("input",e=>{
+
+cargarUsuarios(e.target.value);
+
+});
+
+tabla.addEventListener("click",async e=>{
+
+const tr = e.target.closest("tr");
+
+if(!tr) return;
+
+const id = tr.dataset.id;
+
+if(e.target.classList.contains("editar")){
+
+tr.querySelector(".guardar").style.display="inline-block";
+e.target.style.display="none";
+
 }
 
-// ediar usuario
-function ediarUsuario(row) {
-    const inputs = row.querySelectorAll('td:not(:last-child) input');
-    
-    inputs.forEach(input => {
-        input.disabled = false;
-    });
-    
-    inputs[0].focus();
-    
-    // Cambiar botón a guardar
-    const actionCell = row.querySelector('td:last-child');
-    const ediBtn = actionCell.querySelector('.btn-acc.edi');
-    ediBtn.textContent = '✓';
-    ediBtn.style.backgroundColor = '#4CAF50';
-    ediBtn.title = 'Guardar';
-    
-    // Al hacer click de nuevo, guardar
-    ediBtn.onclick = function(e) {
-        e.preventDefault();
-        
-        const usuario = inputs[0].value;
-        debug('Usuario actualizado:', usuario);
-        
-        mostrarNotificacion(`Usuario "${usuario}" actualizado correctamente`, 'success');
-        
-        inputs.forEach(input => {
-            input.disabled = true;
-        });
-        
-        ediBtn.textContent = '✏️';
-        ediBtn.style.backgroundColor = '';
-        ediBtn.title = 'ediar';
-        ediBtn.onclick = null;
-        configurarBotonesAccionAdmin();
-    };
+if(e.target.classList.contains("guardar")){
+
+const usuario = tr.querySelector(".usuario").value.trim();
+const password = tr.querySelector(".password").value.trim();
+
+try{
+
+const res = await fetch("/api/usuarios/editar.php",{
+
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({id,usuario,password})
+
+});
+
+const data = await res.json();
+
+if(data.success){
+
+alert("Usuario actualizado");
+
+tr.querySelector(".editar").style.display="inline-block";
+e.target.style.display="none";
+
+}else{
+
+alert("Error: "+data.error);
+
 }
 
-// Eliminar usuario
-function eliminarUsuario(row) {
-    const usuario = row.querySelector('td:nth-child(1) input').value;
-    
-    if (confirm(`¿Estás seguro de que deseas eliminar al usuario "${usuario}"?`)) {
-        debug('Usuario eliminado:', usuario);
-        
-        row.style.animation = 'fadeOut 0.3s ease-out';
-        setTimeout(() => {
-            row.remove();
-            mostrarNotificacion(`Usuario "${usuario}" eliminado correctamente`, 'success');
-        }, 300);
-    }
+}catch(err){
+
+alert("Error de conexión");
+console.error(err);
+
 }
 
-// Agregar estilos de animación
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeOut {
-        from {
-            opacity: 1;
-            transfrm: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transfrm: translateX(-20px);
-        }
-    }
-    
-    .tab-dat input {
-        cursor: default;
-    }
-    
-    .tab-dat input:disabled {
-        background-color: transparent;
-        border: none;
-        padding: 0;
-    }
-`;
-document.head.appendChild(style);
+}
 
+if(e.target.classList.contains("eliminar")){
 
+if(!confirm("¿Eliminar usuario?")) return;
+
+try{
+
+const res = await fetch("/api/usuarios/eliminar.php",{
+
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({id})
+
+});
+
+const data = await res.json();
+
+if(data.success){
+
+tr.remove();
+
+}else{
+
+alert("Error: "+data.error);
+
+}
+
+}catch(err){
+
+alert("Error conexión");
+console.error(err);
+
+}
+
+}
+
+});
+
+});

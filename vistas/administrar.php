@@ -53,7 +53,7 @@ if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
 
 <h2>Lista de Usuarios</h2>
 
-<a href="/vistas/adm agregar.php">
+<a href="/vistas/adm-add.php">
 <button class="b bp">+ Nuevo Usuario</button>
 </a>
 
@@ -68,17 +68,24 @@ if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
 <table class="td">
 
 <thead>
-
 <tr>
 <th>ID</th>
 <th>Usuario</th>
-<th>Acciones</th>
+<th>Contraseña</th>
 </tr>
-
 </thead>
 
 <tbody id="tablaUsuarios">
-<!-- JavaScript insertará los usuarios -->
+<tr>
+<td>1</td>
+<td>admin</td>
+<td>
+<div class="pw">
+<input type="password" value="12345678" readonly class="pwi">
+<button class="bpw" onclick="togglePassword(this)">👁</button>
+</div>
+</td>
+</tr>
 </tbody>
 
 </table>
