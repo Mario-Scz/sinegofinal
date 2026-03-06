@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", cargarLibros);
 
 function cargarLibros(){
 
-fetch("/api/catalogo/read.php")
+fetch("/api/catalogo/consultar.php")
 
 .then(res => res.json())
 
@@ -54,7 +54,7 @@ function eliminarLibro(id){
 
 if(!confirm("Eliminar libro?")) return;
 
-fetch("/api/catalogo/delete.php?id="+id)
+fetch("/api/catalogo/eliminar.php?id="+id)
 
 .then(res=>res.json())
 
@@ -70,7 +70,7 @@ const autor = document.getElementById("autor"+id).value;
 const tipo = document.getElementById("tipo"+id).value;
 const codigo = document.getElementById("codigo"+id).value;
 
-fetch("/api/catalogo/update.php",{
+fetch("/api/catalogo/editar.php",{
 
 method:"POST",
 
