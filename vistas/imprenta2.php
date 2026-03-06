@@ -9,7 +9,7 @@ if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
     header('Location: /vistas/register.php');
     exit;
 }
-
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
