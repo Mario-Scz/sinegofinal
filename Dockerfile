@@ -1,7 +1,10 @@
 FROM php:8.2-apache
 
-COPY . /var/www/html/
+# Instalar extensión PDO MySQL
+RUN docker-php-ext-install pdo pdo_mysql
 
+# Copiar archivos del proyecto
+COPY . /var/www/html
+
+# Permitir .htaccess
 RUN a2enmod rewrite
-
-RUN chown -R www-data:www-data /var/www/html
