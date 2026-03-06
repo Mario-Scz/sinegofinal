@@ -113,7 +113,7 @@ if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
         <p>Gestión de envíos</p>
       </a>
 
-      <a href="catalogo.php" class="ac">
+      <a href="catalog.php" class="ac">
         <div class="ia">
           <img src="/img/catalogo.png" alt="Catálogo" />
         </div>
@@ -137,6 +137,3 @@ if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
 <script src="/js/favorites.js"></script>
 </body>
 </html>
-
-
-

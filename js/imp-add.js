@@ -1,83 +1,37 @@
-// ============================================
-// AGREGAR NUEVA PRODUCCIÓN DE IMPRENTA
-// ============================================
+// imp-add.js
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector(".fm");
 
-document.addEventListener('DOMContentLoaded', function() {
-    inicializarfrmImprenta();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const autor = document.getElementById("autor").value.trim();
+    const tipo = document.getElementById("tipo").value.trim();
+    const idLibro = document.getElementById("idLibro").value.trim();
+
+    if (!autor || !tipo || !idLibro) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/imprenta/agregar.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ autor, tipo, idLibro })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Registro agregado con ID " + data.id);
+        form.reset();
+      } else {
+        alert("Error: " + (data.error || "Desconocido"));
+      }
+    } catch (err) {
+      alert("Error de conexión: " + err.message);
+      console.error(err);
+    }
+  });
 });
-
-function inicializarfrmImprenta() {
-    const frm = document.querySelector('.frm');
-    
-    if (frm) {
-        // Validar en tiempo real
-        const inputs = frm.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('blur', validarcmpImprenta);
-        });
-        
-        // Submit del frm
-        frm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            guardarNuevaProduccion();
-        });
-        
-        debug('frm de agregar producción inicializado');
-    }
-}
-
-function validarcmpImprenta(e) {
-    const cmp = e.target;
-    const valor = cmp.value.trim();
-    
-    if (!valor) {
-        cmp.style.borderColor = '#f44336';
-        return false;
-    } else {
-        cmp.style.borderColor = '#4CAF50';
-        return true;
-    }
-}
-
-function guardarNuevaProduccion() {
-    const idLibro = document.getElementById('idLibro')?.value.trim() || '';
-    const autor = document.getElementById('autor')?.value.trim() || '';
-    const tipo = document.getElementById('tipo')?.value.trim() || '';
-    
-    // Validaciones
-    if (!idLibro) {
-        mostrarNotificacion('Por favor ingresa el ID del libro', 'error');
-        return;
-    }
-    
-    if (!autor) {
-        mostrarNotificacion('Por favor ingresa el autor', 'error');
-        return;
-    }
-    
-    if (!tipo) {
-        mostrarNotificacion('Por favor ingresa el tipo de impresión', 'error');
-        return;
-    }
-    
-    debug('Nueva producción guardada:', { idLibro, autor, tipo });
-    
-    // Guardar en localStorage (simulación)
-    let producciones = Storage.get('producciones') || [];
-    producciones.push({
-        id: Date.now(),
-        idLibro,
-        autor,
-        tipo,
-        fechaCreacion: new Date().toISOString()
-    });
-    Storage.set('producciones', producciones);
-    
-    mostrarNotificacion(`✓ Producción de "${idLibro}" agregada correctamente`, 'success');
-    
-    setTimeout(() => {
-        window.location.href = 'imprenta2.html';
-    }, 1500);
-}
-
-

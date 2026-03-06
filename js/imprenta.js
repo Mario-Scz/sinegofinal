@@ -1,121 +1,106 @@
-// ============================================
-// FUNCIONALIDAD DE IMPRENTA
-// ============================================
+// imprenta.js
+document.addEventListener("DOMContentLoaded", () => {
+  const tabla = document.getElementById("tablaImprenta");
+  const buscarInput = document.getElementById("buscarImprenta");
 
-document.addEventListener('DOMContentLoaded', function() {
-    inicializarImprenta();
+  // Función para actualizar la tabla desde el servidor
+  async function cargarImprenta(query = "") {
+    try {
+      const res = await fetch(`/api/imprenta/consultar.php?buscar=${encodeURIComponent(query)}`);
+      const data = await res.json();
+
+      tabla.innerHTML = "";
+      data.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.dataset.id = item.id;
+
+        tr.innerHTML = `
+          <td data-label="ID">${item.id}</td>
+          <td data-label="Autor"><input type="text" class="autor" value="${item.autor}"></td>
+          <td data-label="Tipo"><input type="text" class="tipo" value="${item.tipo}"></td>
+          <td data-label="ID Libro"><input type="text" class="idLibro" value="${item.idLibro}"></td>
+          <td data-label="Acciones">
+            <div class="ba">
+              <button class="ba editar">✏️</button>
+              <button class="ba guardar" style="display:none;">💾</button>
+              <button class="ba eliminar">🗑️</button>
+            </div>
+          </td>
+        `;
+        tabla.appendChild(tr);
+      });
+    } catch (err) {
+      console.error("Error al cargar imprenta:", err);
+    }
+  }
+
+  // Cargar imprenta al inicio
+  cargarImprenta();
+
+  // Buscar mientras escribes
+  buscarInput?.addEventListener("input", e => {
+    cargarImprenta(e.target.value);
+  });
+
+  // Delegación de eventos para editar, guardar y eliminar
+  tabla.addEventListener("click", async e => {
+    const tr = e.target.closest("tr");
+    if (!tr) return;
+    const id = tr.dataset.id;
+
+    // EDITAR: mostrar botón guardar
+    if (e.target.classList.contains("editar")) {
+      tr.querySelector(".guardar").style.display = "inline-block";
+      e.target.style.display = "none";
+    }
+
+    // GUARDAR: enviar cambios al servidor
+    if (e.target.classList.contains("guardar")) {
+      const autor = tr.querySelector(".autor").value.trim();
+      const tipo = tr.querySelector(".tipo").value.trim();
+      const idLibro = tr.querySelector(".idLibro").value.trim();
+
+      try {
+        const res = await fetch("/api/imprenta/editar.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, autor, tipo, idLibro })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert("Registro actualizado");
+          tr.querySelector(".editar").style.display = "inline-block";
+          e.target.style.display = "none";
+        } else {
+          alert("Error al actualizar: " + (data.error || "desconocido"));
+        }
+      } catch (err) {
+        alert("Error de conexión: " + err.message);
+        console.error(err);
+      }
+    }
+
+    // ELIMINAR
+    if (e.target.classList.contains("eliminar")) {
+      if (!confirm("¿Eliminar registro de imprenta?")) return;
+      try {
+        const res = await fetch("/api/imprenta/eliminar.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          tr.remove();
+        } else {
+          alert("Error al eliminar: " + (data.error || "desconocido"));
+        }
+      } catch (err) {
+        alert("Error de conexión: " + err.message);
+        console.error(err);
+      }
+    }
+  });
 });
-
-function inicializarImprenta() {
-    // Búsqueda
-    const inpBus = document.querySelector('.inp-bus');
-    if (inpBus) {
-        inpBus.addEventListener('input', buscarServicios);
-    }
-    
-    // Botones de acción
-    configurarBotonesImprenta();
-    
-    debug('Imprenta inicializada');
-}
-
-// Buscar servicios
-function buscarServicios(e) {
-    const termBus = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll('.tab-dat tbody tr');
-    
-    let serviciosVisibles = 0;
-    
-    rows.forEach(row => {
-        const celdas = row.querySelectorAll('td input');
-        let coincide = false;
-        
-        celdas.forEach(celda => {
-            if (celda.value.toLowerCase().includes(termBus)) {
-                coincide = true;
-            }
-        });
-        
-        row.style.display = coincide ? '' : 'none';
-        if (coincide) serviciosVisibles++;
-    });
-    
-    debug(`Búsqueda de servicios: ${termBus} - ${serviciosVisibles} resultados`);
-}
-
-// Configurar botones de imprenta
-function configurarBotonesImprenta() {
-    const table = document.querySelector('.tab-dat');
-    if (!table) return;
-    
-    const ediButtons = table.querySelectorAll('.bacc.edi');
-    ediButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const row = this.closest('tr');
-            ediarServicio(row);
-        });
-    });
-    
-    const delButtons = table.querySelectorAll('.bacc.del');
-    delButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const row = this.closest('tr');
-            eliminarServicio(row);
-        });
-    });
-}
-
-// ediar servicio
-function ediarServicio(row) {
-    const inputs = row.querySelectorAll('td:not(:last-child) input');
-    
-    inputs.forEach(input => {
-        input.disabled = false;
-    });
-    
-    inputs[0].focus();
-    
-    const actionCell = row.querySelector('td:last-child');
-    const ediBtn = actionCell.querySelector('.btn-acc.edi');
-    ediBtn.textContent = '✓';
-    ediBtn.style.backgroundColor = '#4CAF50';
-    ediBtn.title = 'Guardar';
-    
-    ediBtn.onclick = function(e) {
-        e.preventDefault();
-        
-        const servicio = inputs[0].value;
-        debug('Servicio actualizado:', servicio);
-        
-        mostrarNotificacion(`Servicio "${servicio}" actualizado correctamente`, 'success');
-        
-        inputs.forEach(input => {
-            input.disabled = true;
-        });
-        
-        ediBtn.textContent = '✏️';
-        ediBtn.style.backgroundColor = '';
-        ediBtn.title = 'ediar';
-        ediBtn.onclick = null;
-        configurarBotonesImprenta();
-    };
-}
-
-// Eliminar servicio
-function eliminarServicio(row) {
-    const servicio = row.querySelector('td:nth-child(1) input').value;
-    
-    if (confirm(`¿Estás seguro de eliminar el servicio "${servicio}"?`)) {
-        debug('Servicio eliminado:', servicio);
-        
-        row.style.animation = 'fadeOut 0.3s ease-out';
-        setTimeout(() => {
-            row.remove();
-            mostrarNotificacion(`Servicio "${servicio}" eliminado correctamente`, 'success');
-        }, 300);
-    }
-}
-
-
