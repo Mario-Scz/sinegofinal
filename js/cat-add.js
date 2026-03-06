@@ -1,11 +1,9 @@
+// cat-add.js
 document.addEventListener("DOMContentLoaded", () => {
 
   const form = document.querySelector(".fm");
 
-  if (!form) return;
-
   form.addEventListener("submit", async (e) => {
-
     e.preventDefault();
 
     const codigo = document.getElementById("idL").value.trim();
@@ -26,32 +24,25 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          codigo: codigo,
-          autor: autor,
-          titulo: titulo,
-          tipo: tipo
+          codigo,
+          autor,
+          titulo,
+          tipo
         })
       });
 
       const data = await res.json();
 
       if (data.success) {
-
-        alert("Libro agregado con ID " + data.id);
-
+        alert("Libro agregado correctamente");
         form.reset();
-
       } else {
-
-        alert("Error: " + (data.error || "Error al agregar"));
-
+        alert("Error: " + data.error);
       }
 
-    } catch (err) {
-
+    } catch (error) {
+      console.error(error);
       alert("Error de conexión");
-      console.error(err);
-
     }
 
   });
