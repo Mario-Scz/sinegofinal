@@ -1,13 +1,28 @@
 // imp-add.js
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector(".fm");
+  const form = document.getElementById("formImprenta");
+
+  if (!form) {
+    console.error("No se encontró el formulario con id 'formImprenta'");
+    return;
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const idLibro = document.getElementById("idL").value.trim();
-    const autor = document.getElementById("aut").value.trim();
-    const tipo = document.getElementById("tp").value.trim();
+    // Obtener los valores de los inputs
+    const idLibroInput = document.getElementById("idLibro");
+    const autorInput = document.getElementById("autor");
+    const tipoInput = document.getElementById("tipo");
+
+    if (!idLibroInput || !autorInput || !tipoInput) {
+      alert("Error: No se encontraron todos los campos del formulario.");
+      return;
+    }
+
+    const idLibro = idLibroInput.value.trim();
+    const autor = autorInput.value.trim();
+    const tipo = tipoInput.value.trim();
 
     if (!idLibro || !autor || !tipo) {
       alert("Por favor, completa todos los campos.");
@@ -27,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Producción agregada con ID " + data.id);
         form.reset();
       } else {
-        alert("Error: " + (data.error || "desconocido"));
+        alert("Error: " + (data.error || "Desconocido"));
       }
     } catch (err) {
       alert("Error de conexión: " + err.message);
