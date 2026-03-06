@@ -1,54 +1,30 @@
 <?php
+header('Content-Type: application/json');
 session_start();
-require_once __DIR__ . "/../../config/db.php";
+require_once "../../config/db.php";
 
-header("Content-Type: application/json");
+$input = json_decode(file_get_contents('php://input'), true);
 
-$data = json_decode(file_get_contents("php://input"), true);
-
-$usuario = trim($data["usuario"] ?? "");
-$password = trim($data["password"] ?? "");
-
-if (!$usuario || !$password) {
-    echo json_encode([
-        "success" => false,
-        "mensaje" => "Todos los campos son obligatorios"
-    ]);
+if (!$input || !isset($input['usuario'], $input['contraseña'])) {
+    echo json_encode(['error' => 'Datos incompletos']);
     exit;
 }
 
 try {
+    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario = :usuario LIMIT 1");
+    $stmt->execute(['usuario' => $input['usuario']]);
+    $user = $stmt->fetch();
 
-    $stmt = $pdo->prepare("SELECT id, usuario, contraseña FROM usuarios WHERE usuario = :usuario LIMIT 1");
-    $stmt->execute(["usuario" => $usuario]);
-
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($user && password_verify($password, $user["contraseña"])) {
-
+    if ($user && password_verify($input['contraseña'], $user['contraseña'])) {
+        // Login correcto
         session_regenerate_id(true);
+        $_SESSION['usuario'] = $user['usuario'];
 
-        $_SESSION["id"] = $user["id"];
-        $_SESSION["usuario"] = $user["usuario"];
-
-        echo json_encode([
-            "success" => true
-        ]);
-
+        echo json_encode(['success' => true]);
     } else {
-
-        echo json_encode([
-            "success" => false,
-            "mensaje" => "Usuario o contraseña incorrectos"
-        ]);
-
+        echo json_encode(['error' => 'Usuario o contraseña incorrectos.']);
     }
 
-} catch (Exception $e) {
-
-    echo json_encode([
-        "success" => false,
-        "mensaje" => "Error del servidor"
-    ]);
-
+} catch (PDOException $e) {
+    echo json_encode(['error' => $e->getMessage()]);
 }

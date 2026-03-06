@@ -1,17 +1,24 @@
 <?php
 $pageTitle = 'Iniciar Sesión';
 session_start();
-
 require __DIR__ . '/../config/db.php';
 
-// Si ya hay sesión activa
+// Si ya hay sesión activa, redirigir al menú
 if (!empty($_SESSION['usuario'])) {
     header('Location: /vistas/menu.php');
     exit;
 }
-?>
 
-<?php include __DIR__ . '/../includes/header.php'; ?>
+$error = '';
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Iniciar Sesión - Sinego</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
 
 <section class="d">
   <div class="hc">
@@ -27,31 +34,32 @@ if (!empty($_SESSION['usuario'])) {
         <img src="/img/sinego.png" alt="Sinego" />
       </div>
       <h2>Bienvenido</h2>
-      <p class="login-subtitle">Ingresa tus credenciales para acceder</p>
+      <p class="login-subtitle">Ingresa tus credenciales</p>
       
-      <form class="login-frm">
+      <form class="login-frm" id="loginForm">
         <div class="fm-grp">
-          <label for="usr">Usuario</label>
-          <input type="text" id="usr" name="usuario" placeholder="Ingresa tu usuario" required>
+          <label for="usuario">Usuario</label>
+          <input type="text" id="usuario" name="usuario" placeholder="Usuario" required>
         </div>
 
         <div class="fm-grp">
-          <label for="pwd">Contraseña</label>
-          <input type="password" id="pwd" name="password" placeholder="Ingresa tu contraseña" required>
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" name="password" placeholder="Contraseña" required>
         </div>
 
         <button type="submit" class="btn-login">Iniciar Sesión</button>
-        <!-- Aquí se mostrarán los errores vía JS -->
+
+        <p id="errorMsg" style="color:red; margin-top:10px;"></p>
       </form>
 
       <p class="login-note">
-        <strong>Nota:</strong> Las cuentas son creadas por administrador. Si aún no tienes acceso, contacta al equipo de soporte.
+        <strong>Nota:</strong> Las cuentas son creadas por administrador.
       </p>
     </div>
   </div>
 </main>
 
-<!-- JS del login -->
 <script src="/js/register.js"></script>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
+</body>
+</html>
