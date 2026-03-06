@@ -2,9 +2,6 @@
 $pageTitle = 'Administración';
 session_start();
 
-$_SESSION['usuario'] = "admin";
-$_SESSION['rol'] = "admin";
-
 if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
     header('Location: /vistas/register.php');
     exit;

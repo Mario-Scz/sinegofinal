@@ -6,52 +6,11 @@ require __DIR__ . '/../config/db.php';
 
 // Si ya hay sesión activa
 if (!empty($_SESSION['usuario'])) {
-
-    // Redirigir según rol
-    if ($_SESSION['rol'] === 'admin') {
-        header('Location: /vistas/menu.php');
-    } else {
-        header('Location: /vistas/panel_cliente.php');
-    }
+    header('Location: /vistas/menu.php');
     exit;
 }
-
-$error = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    $usuario = trim($_POST['usuario'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-
-    if (empty($usuario) || empty($password)) {
-        $error = "Todos los campos son obligatorios.";
-    } else {
-
-        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario = :usuario LIMIT 1");
-        $stmt->execute(['usuario' => $usuario]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($password, $user['password'])) {
-
-            session_regenerate_id(true);
-
-            $_SESSION['usuario'] = $user['usuario'];
-            $_SESSION['rol'] = $user['rol']; // 🔥 IMPORTANTE
-
-            // 🔥 Redirección por rol
-            if ($user['rol'] === 'admin') {
-                header("Location: /vistas/menu.php");
-            } else {
-                header("Location: /vistas/bienvenido.php");
-            }
-            exit;
-
-        } else {
-            $error = "Usuario o contraseña incorrectos.";
-        }
-    }
-}
 ?>
+
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
 <section class="d">
@@ -70,22 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <h2>Bienvenido</h2>
       <p class="login-subtitle">Ingresa tus credenciales para acceder</p>
       
-      <form class="login-frm" method="post">
+      <form class="login-frm">
         <div class="fm-grp">
-          <label for="usuario">Usuario</label>
+          <label for="usr">Usuario</label>
           <input type="text" id="usr" name="usuario" placeholder="Ingresa tu usuario" required>
         </div>
 
         <div class="fm-grp">
-          <label for="password">Contraseña</label>
+          <label for="pwd">Contraseña</label>
           <input type="password" id="pwd" name="password" placeholder="Ingresa tu contraseña" required>
         </div>
 
         <button type="submit" class="btn-login">Iniciar Sesión</button>
-
-          <?php if (!empty($error)): ?>
-            <p style="color:red; margin-top:10px;"><?= htmlspecialchars($error) ?></p>
-          <?php endif; ?>
+        <!-- Aquí se mostrarán los errores vía JS -->
       </form>
 
       <p class="login-note">
@@ -94,4 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </div>
 </main>
+
+<!-- JS del login -->
+<script src="/js/login.js"></script>
+
 <?php include __DIR__ . '/../includes/footer.php'; ?>
