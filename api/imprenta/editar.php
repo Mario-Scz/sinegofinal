@@ -10,7 +10,7 @@ if (!$input || !isset($input['id'], $input['idLibro'], $input['autor'], $input['
 }
 
 try {
-    $stmt = $pdo->prepare("UPDATE imprenta SET idLibro = ?, autor = ?, tipoImpresion = ? WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE imprenta2 SET idLibro = ?, autor = ?, tipo = ? WHERE id = ?");
     $stmt->execute([$input['idLibro'], $input['autor'], $input['tipo'], $input['id']]);
     echo json_encode(['success' => true]);
 } catch (PDOException $e) {
