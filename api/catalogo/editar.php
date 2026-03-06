@@ -1,36 +1,29 @@
 <?php
-header('Content-Type: application/json');
-require_once "../../config/db.php";
+header("Content-Type: application/json");
 
-$data = json_decode(file_get_contents("php://input"), true);
+$conexion = new mysqli("localhost","root","","sinego");
 
-if(!isset($data["id"])){
-
-    echo json_encode(["error"=>"ID faltante"]);
+if ($conexion->connect_error) {
+    echo json_encode(["success"=>false]);
     exit;
-
 }
 
-try{
+$id = $_POST["id"];
+$codigo = $_POST["codigo"];
+$autor = $_POST["autor"];
+$titulo = $_POST["titulo"];
+$tipo = $_POST["tipo"];
 
-    $stmt = $pdo->prepare("
-        UPDATE libros
-        SET codigo=?, autor=?, titulo=?, tipo=?
-        WHERE id=?
-    ");
+$sql = "UPDATE libros 
+        SET codigo=?, autor=?, titulo=?, tipo=? 
+        WHERE id=?";
 
-    $stmt->execute([
-        $data["codigo"],
-        $data["autor"],
-        $data["titulo"],
-        $data["tipo"],
-        $data["id"]
-    ]);
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("ssssi",$codigo,$autor,$titulo,$tipo,$id);
 
+if($stmt->execute()){
     echo json_encode(["success"=>true]);
-
-}catch(PDOException $e){
-
-    echo json_encode(["error"=>$e->getMessage()]);
-
+}else{
+    echo json_encode(["success"=>false]);
 }
+?>

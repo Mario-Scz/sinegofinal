@@ -1,26 +1,22 @@
 <?php
-header('Content-Type: application/json');
-require_once "../../config/db.php";
+header("Content-Type: application/json");
 
-$data = json_decode(file_get_contents("php://input"), true);
+$conexion = new mysqli("localhost","root","","sinego");
 
-if(!isset($data["id"])){
-
-    echo json_encode(["error"=>"ID faltante"]);
+if ($conexion->connect_error) {
+    echo json_encode(["success"=>false]);
     exit;
-
 }
 
-try{
+$id = $_POST["id"];
 
-    $stmt = $pdo->prepare("DELETE FROM libros WHERE id=?");
+$sql = "DELETE FROM libros WHERE id = ?";
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("i",$id);
 
-    $stmt->execute([$data["id"]]);
-
+if($stmt->execute()){
     echo json_encode(["success"=>true]);
-
-}catch(PDOException $e){
-
-    echo json_encode(["error"=>$e->getMessage()]);
-
+}else{
+    echo json_encode(["success"=>false]);
 }
+?>

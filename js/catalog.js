@@ -54,43 +54,50 @@ function eliminarLibro(id){
 
 if(!confirm("Eliminar libro?")) return;
 
-fetch("/api/catalogo/eliminar.php?id="+id)
-
+fetch("/api/catalogo/eliminar.php",{
+method:"POST",
+headers:{
+"Content-Type":"application/x-www-form-urlencoded"
+},
+body:"id="+id
+})
 .then(res=>res.json())
+.then(data=>{
 
-.then(()=>{
+if(data.success){
 cargarLibros();
+}else{
+alert("Error al eliminar");
+}
+
 });
 
 }
 
 function editarLibro(id){
 
-const autor = document.getElementById("autor"+id).value;
-const tipo = document.getElementById("tipo"+id).value;
-const codigo = document.getElementById("codigo"+id).value;
+let fila = document.getElementById("fila-"+id);
+
+let codigo = fila.querySelector(".codigo").value;
+let autor = fila.querySelector(".autor").value;
+let titulo = fila.querySelector(".titulo").value;
+let tipo = fila.querySelector(".tipo").value;
 
 fetch("/api/catalogo/editar.php",{
-
 method:"POST",
-
 headers:{
-"Content-Type":"application/json"
+"Content-Type":"application/x-www-form-urlencoded"
 },
-
-body:JSON.stringify({
-id:id,
-autor:autor,
-tipo:tipo,
-codigo:codigo
-})
-
+body:`id=${id}&codigo=${codigo}&autor=${autor}&titulo=${titulo}&tipo=${tipo}`
 })
 .then(res=>res.json())
-.then(()=>{
+.then(data=>{
 
+if(data.success){
 alert("Libro actualizado");
-cargarLibros();
+}else{
+alert("Error al editar");
+}
 
 });
 
