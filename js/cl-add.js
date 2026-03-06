@@ -10,7 +10,7 @@ let nombre = document.getElementById("nombre").value;
 let telefono = document.getElementById("telefono").value;
 let correo = document.getElementById("correo").value;
 
-fetch("/api/clientes/agregar.php", {
+fetch("/api/cliente/agregar.php", {
 
 method: "POST",
 
