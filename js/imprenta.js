@@ -34,9 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
           </td>
 
           <td>
-            <button class="editar">Editar</button>
-            <button class="guardar" style="display:none;">Guardar</button>
-            <button class="eliminar">Eliminar</button>
+            <button class="editar">✏️</button>
+            <button class="guardar" style="display:none;">💾</button>
+            <button class="eliminar">🗑️</button>
           </td>
         `;
 
