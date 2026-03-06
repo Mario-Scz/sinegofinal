@@ -1,24 +1,23 @@
-// imp.js
 document.addEventListener("DOMContentLoaded", () => {
   const tabla = document.getElementById("tablaImprenta");
   const buscarInput = document.getElementById("buscarImprenta");
 
-  // Función para cargar la tabla desde el servidor
-  async function cargarImprentas(query = "") {
+  // Función global para recargar tabla
+  window.cargarProducciones = async (query = "") => {
     try {
       const res = await fetch(`/api/imprenta/consultar.php?buscar=${encodeURIComponent(query)}`);
       const data = await res.json();
 
       tabla.innerHTML = "";
-      data.forEach(item => {
+      data.forEach(produccion => {
         const tr = document.createElement("tr");
-        tr.dataset.id = item.id;
+        tr.dataset.id = produccion.id;
 
         tr.innerHTML = `
-          <td data-label="ID">${item.id}</td>
-          <td data-label="ID Libro"><input type="text" class="idLibro" value="${item.idLibro}"></td>
-          <td data-label="Autor"><input type="text" class="autor" value="${item.autor}"></td>
-          <td data-label="Tipo"><input type="text" class="tipo" value="${item.tipoImpresion}"></td>
+          <td data-label="ID">${produccion.id}</td>
+          <td data-label="ID Libro"><input type="text" class="id_libro" value="${produccion.id_libro}"></td>
+          <td data-label="Autor"><input type="text" class="autor" value="${produccion.autor}"></td>
+          <td data-label="Tipo"><input type="text" class="tipo" value="${produccion.tipo}"></td>
           <td data-label="Acciones">
             <div class="ba">
               <button class="ba editar">✏️</button>
@@ -30,17 +29,15 @@ document.addEventListener("DOMContentLoaded", () => {
         tabla.appendChild(tr);
       });
     } catch (err) {
-      console.error("Error al cargar imprentas:", err);
+      console.error("Error al cargar producciones:", err);
     }
-  }
+  };
 
   // Cargar tabla al inicio
-  cargarImprentas();
+  cargarProducciones();
 
-  // Buscar mientras se escribe
-  buscarInput?.addEventListener("input", e => {
-    cargarImprentas(e.target.value);
-  });
+  // Buscar mientras escribes
+  buscarInput?.addEventListener("input", e => cargarProducciones(e.target.value));
 
   // Delegación de eventos para editar, guardar y eliminar
   tabla.addEventListener("click", async e => {
@@ -48,15 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!tr) return;
     const id = tr.dataset.id;
 
-    // EDITAR
     if (e.target.classList.contains("editar")) {
       tr.querySelector(".guardar").style.display = "inline-block";
       e.target.style.display = "none";
     }
 
-    // GUARDAR
     if (e.target.classList.contains("guardar")) {
-      const idLibro = tr.querySelector(".idLibro").value.trim();
+      const id_libro = tr.querySelector(".id_libro").value.trim();
       const autor = tr.querySelector(".autor").value.trim();
       const tipo = tr.querySelector(".tipo").value.trim();
 
@@ -64,10 +59,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch("/api/imprenta/editar.php", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, idLibro, autor, tipo })
+          body: JSON.stringify({ id, id_libro, autor, tipo })
         });
         const data = await res.json();
-
         if (data.success) {
           alert("Producción actualizada");
           tr.querySelector(".editar").style.display = "inline-block";
@@ -77,14 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (err) {
         alert("Error de conexión: " + err.message);
-        console.error(err);
       }
     }
 
-    // ELIMINAR
     if (e.target.classList.contains("eliminar")) {
-      if (!confirm("¿Eliminar esta producción?")) return;
-
+      if (!confirm("¿Eliminar producción?")) return;
       try {
         const res = await fetch("/api/imprenta/eliminar.php", {
           method: "POST",
@@ -92,7 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ id })
         });
         const data = await res.json();
-
         if (data.success) {
           tr.remove();
         } else {
@@ -100,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (err) {
         alert("Error de conexión: " + err.message);
-        console.error(err);
       }
     }
   });

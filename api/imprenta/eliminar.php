@@ -3,7 +3,6 @@ header('Content-Type: application/json');
 require_once "../../config/db.php";
 
 $input = json_decode(file_get_contents('php://input'), true);
-
 if (!$input || !isset($input['id'])) {
     echo json_encode(['error' => 'ID no proporcionado']);
     exit;

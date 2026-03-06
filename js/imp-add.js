@@ -1,30 +1,16 @@
-// imp-add.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("formimprenta");
 
-  if (!form) {
-    console.error("No se encontró el formulario con id 'formimprenta'");
-    return;
-  }
+  if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Obtener los valores de los inputs
-    const idLibroInput = document.getElementById("idlibro");
-    const autorInput = document.getElementById("autor");
-    const tipoInput = document.getElementById("tipo");
+    const idLibro = document.getElementById("idlibro").value.trim();
+    const autor = document.getElementById("autor").value.trim();
+    const tipo = document.getElementById("tipo").value.trim();
 
-    if (!idLibroInput || !autorInput || !tipoInput) {
-      alert("Error: No se encontraron todos los campos del formulario.");
-      return;
-    }
-
-    const id_libro = idLibroInput.value.trim();
-    const autor = autorInput.value.trim();
-    const tipo = tipoInput.value.trim();
-
-    if (!id_libro || !autor || !tipo) {
+    if (!idLibro || !autor || !tipo) {
       alert("Por favor, completa todos los campos.");
       return;
     }
@@ -33,20 +19,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch("/api/imprenta/agregar.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_libro, autor, tipo })
+        body: JSON.stringify({ id_libro: idLibro, autor, tipo })
       });
-
       const data = await res.json();
 
       if (data.success) {
         alert("Producción agregada con ID " + data.id);
         form.reset();
+        // Opcional: recargar la tabla automáticamente
+        if (typeof cargarProducciones === "function") {
+          cargarProducciones();
+        }
       } else {
         alert("Error: " + (data.error || "Desconocido"));
       }
     } catch (err) {
       alert("Error de conexión: " + err.message);
-      console.error(err);
     }
   });
 });

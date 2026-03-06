@@ -2,11 +2,15 @@
 header('Content-Type: application/json');
 require_once "../../config/db.php";
 
-$buscar = isset($_GET['buscar']) ? "%{$_GET['buscar']}%" : "%";
+$buscar = $_GET['buscar'] ?? '';
 
 try {
-    $stmt = $pdo->prepare("SELECT * FROM imprenta2 WHERE id_libro LIKE ? OR autor LIKE ? OR tipo LIKE ?");
-    $stmt->execute([$buscar, $buscar, $buscar]);
+    if ($buscar) {
+        $stmt = $pdo->prepare("SELECT * FROM imprenta WHERE id_libro LIKE ? OR autor LIKE ? OR tipo LIKE ?");
+        $stmt->execute(["%$buscar%", "%$buscar%", "%$buscar%"]);
+    } else {
+        $stmt = $pdo->query("SELECT * FROM imprenta ORDER BY id DESC");
+    }
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($result);
 } catch (PDOException $e) {
