@@ -31,15 +31,11 @@ correo
 .then(data => {
 
 if(data.success){
-
 alert("Cliente agregado correctamente");
-
 window.location.href = "/vistas/cliente.php";
-
 }else{
-
-alert("Error al agregar cliente");
-
+alert("Error: " + data.error);
+console.log(data);
 }
 
 });
