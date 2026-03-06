@@ -1,6 +1,6 @@
 // imp-add.js
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("formImprenta");
+  const form = document.getElementById("formimprenta");
 
   if (!form) {
     console.error("No se encontró el formulario con id 'formImprenta'");

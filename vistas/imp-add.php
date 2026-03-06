@@ -46,7 +46,7 @@ if (empty($_SESSION['usuario']) || $_SESSION['rol'] !== 'admin') {
 <form id="formImprenta" class="fm">
 
 <div class="fg">
-<label for="idLibro">ID del Libro</label>
+<label for="idlibro">ID del Libro</label>
 <input type="text" id="idlibro" name="idlibro" placeholder="Ej: IMP001" required>
 </div>
 
