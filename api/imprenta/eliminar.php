@@ -10,7 +10,7 @@ if (!$input || !isset($input['id'])) {
 }
 
 try {
-    $stmt = $pdo->prepare("DELETE FROM imprenta2 WHERE id = ?");
+    $stmt = $pdo->prepare("DELETE FROM imprenta WHERE id = ?");
     $stmt->execute([$input['id']]);
     echo json_encode(['success' => true]);
 } catch (PDOException $e) {

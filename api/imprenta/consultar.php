@@ -5,7 +5,7 @@ require_once "../../config/db.php";
 $buscar = isset($_GET['buscar']) ? "%{$_GET['buscar']}%" : "%";
 
 try {
-    $stmt = $pdo->prepare("SELECT * FROM imprenta2 WHERE idLibro LIKE ? OR autor LIKE ? OR tipoImpresion LIKE ? ORDER BY id ASC");
+    $stmt = $pdo->prepare("SELECT * FROM imprenta2 WHERE idlibro LIKE ? OR autor LIKE ? OR tipo LIKE ?");
     $stmt->execute([$buscar, $buscar, $buscar]);
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode($result);
