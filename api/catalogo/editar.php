@@ -2,30 +2,35 @@
 header('Content-Type: application/json');
 require_once "../../config/db.php";
 
-$input = json_decode(file_get_contents("php://input"), true);
+$data = json_decode(file_get_contents("php://input"), true);
 
-if (!isset($input['id'], $input['autor'], $input['tipo'], $input['id_libro'])) {
-    echo json_encode(["error"=>"Datos incompletos"]);
+if(!isset($data["id"])){
+
+    echo json_encode(["error"=>"ID faltante"]);
     exit;
+
 }
 
-try {
+try{
 
-$stmt = $pdo->prepare("UPDATE catalogo 
-SET autor=?, tipo=?, id_libro=? 
-WHERE id=?");
+    $stmt = $pdo->prepare("
+        UPDATE libros
+        SET codigo=?, autor=?, titulo=?, tipo=?
+        WHERE id=?
+    ");
 
-$stmt->execute([
-$input['autor'],
-$input['tipo'],
-$input['id_libro'],
-$input['id']
-]);
+    $stmt->execute([
+        $data["codigo"],
+        $data["autor"],
+        $data["titulo"],
+        $data["tipo"],
+        $data["id"]
+    ]);
 
-echo json_encode(["success"=>true]);
+    echo json_encode(["success"=>true]);
 
-} catch(PDOException $e){
+}catch(PDOException $e){
 
-echo json_encode(["error"=>$e->getMessage()]);
+    echo json_encode(["error"=>$e->getMessage()]);
 
 }
