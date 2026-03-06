@@ -1,104 +1,155 @@
-document.addEventListener("DOMContentLoaded", cargarLibros);
+document.addEventListener("DOMContentLoaded", () => {
 
-function cargarLibros(){
+  const tabla = document.getElementById("tablaLibros");
+  const buscarInput = document.getElementById("buscarLibro");
 
-fetch("/api/catalogo/consultar.php")
+  // Cargar libros
+  async function cargarLibros(query = "") {
+    try {
 
-.then(res => res.json())
+      const res = await fetch(`/api/catalogo/consultar.php?buscar=${encodeURIComponent(query)}`);
+      const data = await res.json();
 
-.then(data => {
+      tabla.innerHTML = "";
 
-const tabla = document.getElementById("tablaCatalogo");
+      data.forEach(libro => {
 
-tabla.innerHTML = "";
+        const tr = document.createElement("tr");
+        tr.dataset.id = libro.id;
 
-data.forEach(libro => {
+        tr.innerHTML = `
+          <td data-label="Autor">
+            <input type="text" class="autor" value="${libro.autor}">
+          </td>
 
-tabla.innerHTML += `
-<tr>
+          <td data-label="Tipo">
+            <input type="text" class="tipo" value="${libro.tipo}">
+          </td>
 
-<td data-label="Autor">
-<input type="text" value="${libro.autor}" id="autor${libro.id}">
-</td>
+          <td data-label="ID Libro">
+            <input type="text" class="codigo" value="${libro.codigo}">
+          </td>
 
-<td data-label="Tipo">
-<input type="text" value="${libro.tipo}" id="tipo${libro.id}">
-</td>
+          <td data-label="Acciones">
+            <div class="ba">
+              <button class="ba editar">✏️</button>
+              <button class="ba guardar" style="display:none;">💾</button>
+              <button class="ba eliminar">🗑️</button>
+            </div>
+          </td>
+        `;
 
-<td data-label="ID Libro">
-<input type="text" value="${libro.codigo}" id="codigo${libro.id}">
-</td>
+        tabla.appendChild(tr);
 
-<td data-label="Acciones">
-<div class="ba">
+      });
 
-<button class="ba e" onclick="editarLibro(${libro.id})">
-✏️
-</button>
+    } catch (err) {
+      console.error("Error al cargar libros:", err);
+    }
+  }
 
-<button class="ba d" onclick="eliminarLibro(${libro.id})">
-🗑️
-</button>
+  // cargar al inicio
+  cargarLibros();
 
-</div>
-</td>
+  // buscar
+  buscarInput?.addEventListener("input", e => {
+    cargarLibros(e.target.value);
+  });
 
-</tr>
-`;
+  // editar / guardar / eliminar
+  tabla.addEventListener("click", async e => {
+
+    const tr = e.target.closest("tr");
+    if (!tr) return;
+
+    const id = tr.dataset.id;
+
+    // EDITAR
+    if (e.target.classList.contains("editar")) {
+
+      tr.querySelector(".guardar").style.display = "inline-block";
+      e.target.style.display = "none";
+
+    }
+
+    // GUARDAR
+    if (e.target.classList.contains("guardar")) {
+
+      const autor = tr.querySelector(".autor").value.trim();
+      const tipo = tr.querySelector(".tipo").value.trim();
+      const codigo = tr.querySelector(".codigo").value.trim();
+
+      try {
+
+        const res = await fetch("/api/catalogo/editar.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id,
+            autor,
+            tipo,
+            codigo
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+
+          alert("Libro actualizado");
+
+          tr.querySelector(".editar").style.display = "inline-block";
+          e.target.style.display = "none";
+
+        } else {
+
+          alert("Error al actualizar: " + (data.error || "desconocido"));
+
+        }
+
+      } catch (err) {
+
+        alert("Error de conexión: " + err.message);
+        console.error(err);
+
+      }
+
+    }
+
+    // ELIMINAR
+    if (e.target.classList.contains("eliminar")) {
+
+      if (!confirm("¿Eliminar libro?")) return;
+
+      try {
+
+        const res = await fetch("/api/catalogo/eliminar.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+
+          tr.remove();
+
+        } else {
+
+          alert("Error al eliminar: " + (data.error || "desconocido"));
+
+        }
+
+      } catch (err) {
+
+        alert("Error de conexión: " + err.message);
+        console.error(err);
+
+      }
+
+    }
+
+  });
+
 });
-
-});
-}
-
-function eliminarLibro(id){
-
-if(!confirm("Eliminar libro?")) return;
-
-fetch("/api/catalogo/eliminar.php",{
-method:"POST",
-headers:{
-"Content-Type":"application/x-www-form-urlencoded"
-},
-body:"id="+id
-})
-.then(res=>res.json())
-.then(data=>{
-
-if(data.success){
-cargarLibros();
-}else{
-alert("Error al eliminar");
-}
-
-});
-
-}
-
-function editarLibro(id){
-
-let fila = document.getElementById("fila-"+id);
-
-let codigo = fila.querySelector(".codigo").value;
-let autor = fila.querySelector(".autor").value;
-let titulo = fila.querySelector(".titulo").value;
-let tipo = fila.querySelector(".tipo").value;
-
-fetch("/api/catalogo/editar.php",{
-method:"POST",
-headers:{
-"Content-Type":"application/x-www-form-urlencoded"
-},
-body:`id=${id}&codigo=${codigo}&autor=${autor}&titulo=${titulo}&tipo=${tipo}`
-})
-.then(res=>res.json())
-.then(data=>{
-
-if(data.success){
-alert("Libro actualizado");
-}else{
-alert("Error al editar");
-}
-
-});
-
-}
