@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     // Obtener los valores de los inputs
-    const idLibroInput = document.getElementById("idLibro");
+    const idLibroInput = document.getElementById("idlibro");
     const autorInput = document.getElementById("autor");
     const tipoInput = document.getElementById("tipo");
 
