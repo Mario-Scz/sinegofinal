@@ -20,11 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const idlibro = idLibroInput.value.trim();
+    const id_libro = idLibroInput.value.trim();
     const autor = autorInput.value.trim();
     const tipo = tipoInput.value.trim();
 
-    if (!idlibro || !autor || !tipo) {
+    if (!id_libro || !autor || !tipo) {
       alert("Por favor, completa todos los campos.");
       return;
     }
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch("/api/imprenta/agregar.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idlibro, autor, tipo })
+        body: JSON.stringify({ id_libro, autor, tipo })
       });
 
       const data = await res.json();
