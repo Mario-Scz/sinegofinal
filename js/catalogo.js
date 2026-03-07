@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const buscarInput = document.querySelector(".ib");
   const checkboxes = document.querySelectorAll(".flt input[type='checkbox']");
 
-  // Cargar libros desde la API
   async function cargarLibros() {
     try {
       const res = await fetch("/api/catalogo/consultar.php");
@@ -24,13 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
         card.dataset.autor = libro.autor.toLowerCase();
         card.dataset.tipo = libro.tipo.toLowerCase();
 
-        // Formatear precio
         const precio = libro.precio ? parseFloat(libro.precio).toFixed(2) : "0.00";
-        const imagen = libro.imagen ? libro.imagen : "/img/ejemplos.png";
 
         card.innerHTML = `
           <div class="pi">
-            <img src="${imagen}" alt="${libro.titulo}" onerror="this.src='/img/ejemplos.png'">
+            <img src="/img/ejemplos.png" alt="${libro.titulo}">
           </div>
           <div class="pf">
             <h3>${libro.titulo}</h3>
@@ -51,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Filtrar por búsqueda
   buscarInput?.addEventListener("input", e => {
     const termino = e.target.value.toLowerCase();
     const cards = document.querySelectorAll(".pc");
@@ -69,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Filtrar por géneros (checkboxes)
   checkboxes.forEach(checkbox => {
     checkbox.addEventListener("change", () => {
       const termino = checkbox.parentElement.querySelector("span").textContent.toLowerCase();
@@ -87,6 +82,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Cargar al inicio
   cargarLibros();
 });

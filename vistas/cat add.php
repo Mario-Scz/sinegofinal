@@ -66,7 +66,7 @@ require __DIR__ . '/../config/session_check.php';
   <section class="fs">
     <div class="ac">
       <h2>Información del Libro</h2>
-      <form class="fm" enctype="multipart/form-data">
+      <form class="fm">
         <div class="fg">
           <label for="idL">ID del Libro</label>
           <input type="text" id="idL" placeholder="Ej: LIB001" required />
@@ -90,12 +90,6 @@ require __DIR__ . '/../config/session_check.php';
         <div class="fg">
           <label for="prc">Precio ($)</label>
           <input type="number" id="prc" placeholder="Ej: 25.99" step="0.01" min="0" />
-        </div>
-
-        <div class="fg">
-          <label for="img">Portada del Libro</label>
-          <input type="file" id="img" accept="image/*" />
-          <small>Formatos: JPG, PNG, GIF, WEBP</small>
         </div>
 
         <div class="fa">
