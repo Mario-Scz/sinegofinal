@@ -1,12 +1,7 @@
 <?php
 $pageTitle = 'Carrito de Compras';
 session_start();
-$_SESSION['usuario'] = "admin";
-$_SESSION['rol'] = "admin";
-if (empty($_SESSION['usuario'])) {
-    header('Location: /vistas/register.php');
-    exit;
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
