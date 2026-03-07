@@ -49,8 +49,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit; // <- MUY IMPORTANTE
 
     } catch (Exception $e) {
-        // Redirigir al formulario con mensaje de error
-        header("Location: /vistas/imprenta.php?error=1");
+         // Mostrar error real de PHPMailer en la página
+        echo "<h2>Error al enviar el formulario:</h2>";
+        echo "<p>{$mail->ErrorInfo}</p>";
         exit; // <- MUY IMPORTANTE
     }
 }
