@@ -43,10 +43,10 @@ function mostrarItemsCarrito(carrito) {
     carrito.forEach((item, index) => {
         const itemElement = document.createElement('div');
         itemElement.className = 'cart-item';
-        itemElement.dataset.index = index;
         itemElement.dataset.id = item.id;
         itemElement.dataset.cantidad = item.cantidad;
         itemElement.dataset.titulo = item.titulo;
+        itemElement.dataset.precio = item.precio;
         
         itemElement.innerHTML = `
             <div class="item-image">📚</div>
@@ -59,14 +59,112 @@ function mostrarItemsCarrito(carrito) {
                 $${(parseFloat(item.precio || 0) * item.cantidad).toFixed(2)}
             </div>
             <div class="item-quantity">
-                <button class="quantity-btn btn-minus" data-action="decrease">−</button>
+                <button class="quantity-btn btn-minus">−</button>
                 <input type="number" class="quantity-input" value="${item.cantidad}" min="1">
-                <button class="quantity-btn btn-plus" data-action="increase">+</button>
+                <button class="quantity-btn btn-plus">+</button>
                 <button class="item-remove btn-remove">✕</button>
             </div>
         `;
         itemsList.appendChild(itemElement);
     });
+    
+    // AGREGAR EVENT LISTENERS DIRECTOS A LOS BOTONES
+    const minusButtons = document.querySelectorAll('.btn-minus');
+    const plusButtons = document.querySelectorAll('.btn-plus');
+    const removeButtons = document.querySelectorAll('.btn-remove');
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    
+    // Botón Disminuir
+    minusButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemRow = this.closest('.cart-item');
+            const itemId = itemRow.dataset.id;
+            const currentCantidad = parseInt(itemRow.dataset.cantidad);
+            const titulo = itemRow.dataset.titulo;
+            
+            if (currentCantidad > 1) {
+                actualizarCantidad(itemId, currentCantidad - 1, titulo);
+            }
+        });
+    });
+    
+    // Botón Aumentar
+    plusButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemRow = this.closest('.cart-item');
+            const itemId = itemRow.dataset.id;
+            const currentCantidad = parseInt(itemRow.dataset.cantidad);
+            const titulo = itemRow.dataset.titulo;
+            
+            actualizarCantidad(itemId, currentCantidad + 1, titulo);
+        });
+    });
+    
+    // Botón Eliminar
+    removeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const itemRow = this.closest('.cart-item');
+            const itemId = itemRow.dataset.id;
+            const titulo = itemRow.dataset.titulo;
+            
+            if (confirm('¿Estás seguro de que deseas eliminar este item?')) {
+                eliminarItem(itemId, titulo);
+            }
+        });
+    });
+    
+    // Input de cantidad
+    quantityInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const itemRow = this.closest('.cart-item');
+            const itemId = itemRow.dataset.id;
+            const nuevaCantidad = parseInt(this.value);
+            const titulo = itemRow.dataset.titulo;
+            
+            if (nuevaCantidad >= 1) {
+                actualizarCantidad(itemId, nuevaCantidad, titulo);
+            }
+        });
+    });
+}
+
+async function actualizarCantidad(itemId, nuevaCantidad, titulo) {
+    try {
+        const res = await fetch('/api/cart.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'update', product_id: itemId, cantidad: nuevaCantidad })
+        });
+        const data = await res.json();
+        if (data.success) {
+            const itemRow = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+            if (itemRow) {
+                itemRow.dataset.cantidad = nuevaCantidad;
+                const precio = parseFloat(itemRow.dataset.precio);
+                itemRow.querySelector('.item-price').textContent = `$${(precio * nuevaCantidad).toFixed(2)}`;
+                actualizarResumen(JSON.parse(await fetch('/api/cart.php?action=list').then(r => r.text())));
+            }
+        }
+    } catch (err) {
+        console.error('Error al actualizar cantidad:', err);
+    }
+}
+
+async function eliminarItem(itemId, titulo) {
+    try {
+        const res = await fetch('/api/cart.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'remove', product_id: itemId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(`${titulo} removido del carrito`);
+            inicializarCarrito();
+        }
+    } catch (err) {
+        console.error('Error al eliminar:', err);
+    }
 }
 
 function actualizarResumen(carrito) {
@@ -119,106 +217,3 @@ function actualizarContadores() {
 }
 
 setInterval(actualizarContadores, 2000);
-
-// EVENT DELEGATION - Manejo de botones
-document.getElementById('cartItems').addEventListener('click', async function(e) {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    
-    const itemRow = btn.closest('.cart-item');
-    if (!itemRow) return;
-    
-    const itemId = itemRow.dataset.id;
-    const currentCantidad = parseInt(itemRow.dataset.cantidad);
-    const titulo = itemRow.dataset.titulo;
-    
-    // Botón Eliminar
-    if (btn.classList.contains('btn-remove')) {
-        if (confirm('¿Estás seguro de que deseas eliminar este item?')) {
-            try {
-                const res = await fetch('/api/cart.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ action: 'remove', product_id: itemId })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert(`${titulo} removido del carrito`);
-                    inicializarCarrito();
-                }
-            } catch (err) {
-                console.error('Error al eliminar:', err);
-            }
-        }
-        return;
-    }
-    
-    // Botón Disminuir
-    if (btn.classList.contains('btn-minus')) {
-        if (currentCantidad > 1) {
-            const nuevaCantidad = currentCantidad - 1;
-            try {
-                const res = await fetch('/api/cart.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ action: 'update', product_id: itemId, cantidad: nuevaCantidad })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    itemRow.dataset.cantidad = nuevaCantidad;
-                    const precio = parseFloat(itemRow.querySelector('.item-price').textContent.replace('$', ''));
-                    itemRow.querySelector('.item-price').textContent = `$${(precio * nuevaCantidad).toFixed(2)}`;
-                    actualizarResumen(JSON.parse(await fetch('/api/cart.php?action=list').then(r => r.text())));
-                }
-            } catch (err) {
-                console.error('Error al disminuir:', err);
-            }
-        }
-        return;
-    }
-    
-    // Botón Aumentar
-    if (btn.classList.contains('btn-plus')) {
-        const nuevaCantidad = currentCantidad + 1;
-        try {
-            const res = await fetch('/api/cart.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ action: 'update', product_id: itemId, cantidad: nuevaCantidad })
-            });
-            const data = await res.json();
-            if (data.success) {
-                itemRow.dataset.cantidad = nuevaCantidad;
-                const precio = parseFloat(itemRow.querySelector('.item-price').textContent.replace('$', ''));
-                itemRow.querySelector('.item-price').textContent = `$${(precio * nuevaCantidad).toFixed(2)}`;
-                actualizarResumen(JSON.parse(await fetch('/api/cart.php?action=list').then(r => r.text())));
-            }
-        } catch (err) {
-            console.error('Error al aumentar:', err);
-        }
-        return;
-    }
-    
-    // Input de cantidad
-    if (e.target.classList.contains('quantity-input')) {
-        const nuevaCantidad = parseInt(e.target.value);
-        if (nuevaCantidad >= 1) {
-            try {
-                const res = await fetch('/api/cart.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ action: 'update', product_id: itemId, cantidad: nuevaCantidad })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    itemRow.dataset.cantidad = nuevaCantidad;
-                    const precio = parseFloat(itemRow.querySelector('.item-price').textContent.replace('$', ''));
-                    itemRow.querySelector('.item-price').textContent = `$${(precio * nuevaCantidad).toFixed(2)}`;
-                    actualizarResumen(JSON.parse(await fetch('/api/cart.php?action=list').then(r => r.text())));
-                }
-            } catch (err) {
-                console.error('Error al cambiar cantidad:', err);
-            }
-        }
-    }
-});
