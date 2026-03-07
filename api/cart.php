@@ -1,15 +1,40 @@
 <?php
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Manejar preflight requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 // Desactivar errores HTML en la salida
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
+// Intentar cargar la configuración
+$configPath = __DIR__ . '/../config/db.php';
+if (!file_exists($configPath)) {
+    $configPath = __DIR__ . '/../../config/db.php';
+}
+
+if (!file_exists($configPath)) {
+    echo json_encode(['success' => false, 'error' => 'Configuración no encontrada']);
+    exit;
+}
+
 try {
-    require_once "../../config/db.php";
+    require_once $configPath;
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
+    exit;
+}
+
+// Verificar conexión
+if (!isset($pdo)) {
+    echo json_encode(['success' => false, 'error' => 'PDO no está definido']);
     exit;
 }
 
@@ -28,7 +53,7 @@ if ($action === 'list') {
         
         echo json_encode(['success' => true, 'items' => $items]);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode(['success' => false, 'error' => 'Error en consulta: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -61,7 +86,7 @@ if ($action === 'add') {
         
         echo json_encode(['success' => true]);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode(['success' => false, 'error' => 'Error al agregar: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -83,7 +108,7 @@ if ($action === 'update') {
         $stmt->execute([$cantidad, $id]);
         echo json_encode(['success' => true]);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode(['success' => false, 'error' => 'Error al actualizar: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -104,7 +129,7 @@ if ($action === 'remove') {
         $stmt->execute([$id]);
         echo json_encode(['success' => true]);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode(['success' => false, 'error' => 'Error al eliminar: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -115,7 +140,7 @@ if ($action === 'clear') {
         $pdo->query("DELETE FROM carrito");
         echo json_encode(['success' => true]);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        echo json_encode(['success' => false, 'error' => 'Error al vaciar: ' . $e->getMessage()]);
     }
     exit;
 }
