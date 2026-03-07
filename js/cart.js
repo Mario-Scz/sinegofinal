@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     actualizarContadores();
 });
 
+// Carga inicial y actualización de la vista
 function inicializarCarrito() {
     const emptyCart = document.getElementById('emptyCart');
     const itemsList = document.getElementById('cartItems');
@@ -11,10 +12,12 @@ function inicializarCarrito() {
         .then(r => r.json())
         .then(data => {
             if (!data.success) throw new Error('Error al obtener carrito');
+            
             const carrito = data.items;
             if (carrito.length === 0) {
                 emptyCart.style.display = 'block';
                 itemsList.style.display = 'none';
+                actualizarResumen([]); // Poner ceros
             } else {
                 emptyCart.style.display = 'none';
                 itemsList.style.display = 'block';
@@ -22,11 +25,10 @@ function inicializarCarrito() {
                 actualizarResumen(carrito);
             }
         })
-        .catch(err => {
-            console.error('Error:', err);
-        });
+        .catch(err => console.error('Error:', err));
 }
 
+// Genera el HTML de cada fila
 function mostrarItemsCarrito(carrito) {
     const itemsList = document.getElementById('cartItems');
     itemsList.innerHTML = '';
@@ -34,9 +36,10 @@ function mostrarItemsCarrito(carrito) {
     carrito.forEach(item => {
         const itemElement = document.createElement('div');
         itemElement.className = 'cart-item';
-        itemElement.dataset.id_libro = item.id_libro;
+        
+        // IMPORTANTE: Guardamos el ID de la fila del carrito (item.id)
+        itemElement.dataset.id_carrito = item.id; 
         itemElement.dataset.cantidad = item.cantidad;
-        itemElement.dataset.titulo = item.titulo;
         itemElement.dataset.precio = item.precio;
 
         itemElement.innerHTML = `
@@ -51,52 +54,48 @@ function mostrarItemsCarrito(carrito) {
             </div>
             <div class="item-quantity">
                 <button class="quantity-btn btn-minus">−</button>
-                <input type="number" class="quantity-input" value="${item.cantidad}" min="1" />
+                <input type="number" class="quantity-input" value="${item.cantidad}" min="1" readonly />
                 <button class="quantity-btn btn-plus">+</button>
-                <button class="item-remove btn-remove">✕</button>
+                <button class="item-remove btn-remove" title="Eliminar">✕</button>
             </div>
         `;
         itemsList.appendChild(itemElement);
     });
 }
 
-function actualizarCantidad(id_libro, nuevaCantidad, titulo) {
+// Función para sumar o restar unidades
+function actualizarCantidad(id_carrito, nuevaCantidad) {
     fetch('/api/cart.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ action: 'update', product_id: id_libro, cantidad: nuevaCantidad })
+        body: JSON.stringify({ 
+            action: 'update', 
+            product_id: id_carrito, // El PHP espera 'product_id' pero le mandamos el ID del carrito
+            cantidad: nuevaCantidad 
+        })
     })
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            const itemRow = document.querySelector(`.cart-item[data-id_libro="${id_libro}"]`);
-            if (itemRow) {
-                itemRow.dataset.cantidad = nuevaCantidad;
-                const precio = parseFloat(itemRow.dataset.precio);
-                itemRow.querySelector('.item-price').textContent = `$${(precio * nuevaCantidad).toFixed(2)}`;
-                fetch('/api/cart.php?action=list')
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            actualizarResumen(data.items);
-                        }
-                    });
-            }
+            inicializarCarrito(); // Refrescamos todo para ver cambios
         }
     })
     .catch(err => console.error('Error:', err));
 }
 
-function eliminarItem(id_libro, titulo) {
+// Función para eliminar producto
+function eliminarItem(id_carrito, titulo) {
     fetch('/api/cart.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ action: 'remove', product_id: id_libro })
+        body: JSON.stringify({ 
+            action: 'remove', 
+            product_id: id_carrito 
+        })
     })
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            alert(`${titulo} removido del carrito`);
             inicializarCarrito();
             actualizarContadores();
         }
@@ -104,6 +103,7 @@ function eliminarItem(id_libro, titulo) {
     .catch(err => console.error('Error:', err));
 }
 
+// Calcula Subtotal, IVA y Total
 function actualizarResumen(carrito) {
     let subtot = 0;
     carrito.forEach(item => {
@@ -117,69 +117,51 @@ function actualizarResumen(carrito) {
     document.getElementById('total').textContent = `$${tot.toFixed(2)}`;
 }
 
-function procederAlPago() {
-    const carritoDiv = document.getElementById('cartItems');
-    if (carritoDiv.style.display === 'none') {
-        alert('Tu carrito está vacío');
-        return;
-    }
-    alert('Procesando pago. Gracias por tu compra');
-
-    setTimeout(() => {
-        fetch('/api/cart.php?action=clear')
-            .then(() => {
-                window.location.href = '/vistas/bienvenido.php';
-            });
-    }, 2000);
-}
-
-const chkBtn = document.getElementById('chkBtn');
-if (chkBtn) {
-    chkBtn.addEventListener('click', procederAlPago);
-}
-
-// Contadores en tiempo real
-function actualizarContadores() {
-    fetch('/api/cart.php?action=count')
-        .then(r => r.json())
-        .then(data => {
-            document.querySelectorAll('#cc').forEach(el => { el.textContent = data.total || 0; });
-        })
-        .catch(err => console.error('Error contador:', err));
-}
-setInterval(actualizarContadores, 2000);
-
-// Delegación de eventos
+// Eventos de los botones (Delegación)
 document.getElementById('cartItems').addEventListener('click', function(e) {
     const btn = e.target;
     const itemRow = btn.closest('.cart-item');
     if (!itemRow) return;
 
-    const id_libro = itemRow.dataset.id_libro;
-    const cantidad = parseInt(itemRow.dataset.cantidad);
-    const titulo = itemRow.dataset.titulo;
+    const id_carrito = itemRow.dataset.id_carrito;
+    const cantidadActual = parseInt(itemRow.dataset.cantidad);
+    const titulo = itemRow.querySelector('h3').textContent;
 
     if (btn.classList.contains('btn-remove')) {
-        if (confirm('¿Estás seguro de que deseas eliminar este item?')) {
-            eliminarItem(id_libro, titulo);
+        if (confirm(`¿Eliminar "${titulo}" del carrito?`)) {
+            eliminarItem(id_carrito, titulo);
         }
-        return;
-    }
-    if (btn.classList.contains('btn-minus')) {
-        if (cantidad > 1) {
-            actualizarCantidad(id_libro, cantidad - 1, titulo);
+    } 
+    else if (btn.classList.contains('btn-minus')) {
+        if (cantidadActual > 1) {
+            actualizarCantidad(id_carrito, cantidadActual - 1);
+        } else {
+            // Si es 1 y pica menos, preguntamos si quiere borrarlo
+            if (confirm(`¿Eliminar "${titulo}"?`)) eliminarItem(id_carrito, titulo);
         }
-        return;
-    }
-    if (btn.classList.contains('btn-plus')) {
-        actualizarCantidad(id_libro, cantidad + 1, titulo);
-        return;
-    }
-    if (btn.classList.contains('quantity-input')) {
-        const nuevaCantidad = parseInt(btn.value);
-        if (nuevaCantidad >= 1) {
-            actualizarCantidad(id_libro, nuevaCantidad, titulo);
-        }
-        return;
+    } 
+    else if (btn.classList.contains('btn-plus')) {
+        actualizarCantidad(id_carrito, cantidadActual + 1);
     }
 });
+
+// Botón de pago
+const chkBtn = document.getElementById('chkBtn');
+if (chkBtn) {
+    chkBtn.addEventListener('click', () => {
+        alert('Procesando pago... ¡Gracias!');
+        fetch('/api/cart.php?action=clear').then(() => {
+            window.location.href = '/vistas/bienvenido.php';
+        });
+    });
+}
+
+// Contador del icono del nav
+function actualizarContadores() {
+    fetch('/api/cart.php?action=count')
+        .then(r => r.json())
+        .then(data => {
+            const el = document.getElementById('cc');
+            if (el) el.textContent = data.total || 0;
+        });
+}
