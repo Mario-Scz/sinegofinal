@@ -77,36 +77,42 @@
         ?>
 
         <p>Completa los siguientes datos para obtener un presupuesto personalizado</p>
-        <form class="fm" action="/vistas/enviar-form.php" method="POST">
-          <div class="cp">
-            <label>No. de unidades</label>
-            <input type="number" name="unidades" placeholder="Ingrese la cantidad" required />
-          </div>
-          <div class="cp">
-            <label>Cantidad de páginas</label>
-            <input type="number" name="paginas" placeholder="Ingrese el número de páginas" required />
-          </div>
-          <div class="cp">
-            <label>Tipo de impresión</label>
-            <select name="tipo_impresion" required>
-              <option value="">Seleccione un tipo</option>
-              <option value="blanco-negro">Blanco y Negro</option>
-              <option value="color">A Color</option>
-              <option value="especial">Impresión Especial</option>
-            </select>
-          </div>
-          <div class="cp">
-            <label>Material</label>
-            <select name="material" required>
-              <option value="">Seleccione un material</option>
-              <option value="papel-bond">Papel Bond</option>
-              <option value="papel-couche">Papel Couché</option>
-              <option value="cartulina">Cartulina</option>
-              <option value="tela">Tela</option>
-            </select>
-          </div>
-          <button type="submit" class="b bp">Cotizar</button>
-        </form>
+        <form id="formImprenta" class="fm">
+
+<div class="cp">
+<label>No. de unidades</label>
+<input type="number" name="unidades" required>
+</div>
+
+<div class="cp">
+<label>Cantidad de páginas</label>
+<input type="number" name="paginas" required>
+</div>
+
+<div class="cp">
+<label>Tipo de impresión</label>
+<select name="tipo_impresion" required>
+<option value="">Seleccione</option>
+<option value="Blanco y negro">Blanco y negro</option>
+<option value="Color">Color</option>
+</select>
+</div>
+
+<div class="cp">
+<label>Material</label>
+<select name="material" required>
+<option value="">Seleccione</option>
+<option value="Papel bond">Papel bond</option>
+<option value="Cartulina">Cartulina</option>
+<option value="Couché">Couché</option>
+</select>
+</div>
+
+<button type="submit" class="b bp">Cotizar</button>
+
+</form>
+
+<p id="mensajeFormulario"></p>
       </div>
     </div>
   </section>
@@ -138,6 +144,7 @@
 <script src="/js/common.js"></script>
 <script src="/js/cart.js"></script>
 <script src="/js/favorites.js"></script>
+<script src="/js/imprenta2.js"></script>
 
 <!-- ftr -->
 <footer class="ft">

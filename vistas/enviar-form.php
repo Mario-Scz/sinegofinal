@@ -1,58 +1,51 @@
 <?php
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+require 'phpmailer/Exception.php';
 require 'phpmailer/PHPMailer.php';
 require 'phpmailer/SMTP.php';
-require 'phpmailer/Exception.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$unidades = $_POST['unidades'] ?? '';
+$paginas = $_POST['paginas'] ?? '';
+$tipo_impresion = $_POST['tipo_impresion'] ?? '';
+$material = $_POST['material'] ?? '';
 
-    $unidades = $_POST['unidades'];
-    $paginas = $_POST['paginas'];
-    $tipo_impresion = $_POST['tipo_impresion'];
-    $material = $_POST['material'];
+$mail = new PHPMailer(true);
 
-    $mail = new PHPMailer(true);
+try{
 
-    try {
-        // Configuración SMTP Gmail
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'mroberto.drako@gmail.com';        // tu Gmail
-        $mail->Password   = 'uxhh eptj pgmc vxif';           // contraseña de aplicación
-        $mail->SMTPSecure = 'tls';
-        $mail->Port       = 587;
-        $mail->SMTPDebug  = 2;       // <-- DEBUG
-        $mail->Debugoutput = 'html';
+$mail->isSMTP();
+$mail->Host = 'smtp.gmail.com';
+$mail->SMTPAuth = true;
+$mail->Username = 'mroberto.drako@gmail.com';
+$mail->Password = 'uxhh eptj pgmc vxif';
+$mail->SMTPSecure = 'tls';
+$mail->Port = 587;
 
-        // Destinatario
-        $mail->setFrom('mroberto.drako@gmail.com', 'Sinego Imprenta');
-        $mail->addAddress('mroberto.drako@gmail.com'); // donde recibes los mails
+$mail->Timeout = 10;
 
-        // Contenido del correo
-        $mail->isHTML(true);
-        $mail->Subject = 'Nueva Cotización de Imprenta';
-        $mail->Body    = "
-            <h3>Nueva solicitud de cotización:</h3>
-            <p><strong>Unidades:</strong> $unidades</p>
-            <p><strong>Páginas:</strong> $paginas</p>
-            <p><strong>Tipo de impresión:</strong> $tipo_impresion</p>
-            <p><strong>Material:</strong> $material</p>
-        ";
+$mail->setFrom('mroberto.drako@gmail.com','Formulario Sinego');
+$mail->addAddress('mroberto.drako@gmail.com');
 
-        $mail->send();
+$mail->isHTML(true);
+$mail->Subject = "Nueva cotización";
 
-        // Redirigir al formulario con mensaje de éxito
-        header("Location: /vistas/imprenta.php?success=1");
-        exit; // <- MUY IMPORTANTE
+$mail->Body = "
+<h2>Nueva solicitud</h2>
+<b>Unidades:</b> $unidades <br>
+<b>Páginas:</b> $paginas <br>
+<b>Tipo:</b> $tipo_impresion <br>
+<b>Material:</b> $material
+";
 
-    } catch (Exception $e) {
-         // Mostrar error real de PHPMailer en la página
-        echo "<h2>Error al enviar el formulario:</h2>";
-        echo "<p>{$mail->ErrorInfo}</p>";
-        exit; // <- MUY IMPORTANTE
-    }
+$mail->send();
+
+echo "<span style='color:green;'>Formulario enviado correctamente ✔</span>";
+
+}catch(Exception $e){
+
+echo "<span style='color:red;'>Error al enviar: ".$mail->ErrorInfo."</span>";
+
 }
-?>
