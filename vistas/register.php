@@ -44,17 +44,6 @@ if (!empty($_SESSION['usuario'])) {
       </ul>
     </nav>
 
-    <div class="ni">
-      <?php if (!empty($_SESSION['usuario'])): ?>
-        <a href="/vistas/logout.php" class="ic" title="Cerrar sesión">
-          <span>Salir</span>
-        </a>
-      <?php else: ?>
-        <a href="/vistas/register.php" class="ic" title="Iniciar sesión">
-          <span>Iniciar sesión</span>
-        </a>
-      <?php endif; ?>
-    </div>
   </div>
 </nav>
 
