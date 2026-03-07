@@ -32,7 +32,7 @@ body {
 }
 
 /* =========================================
-   NAVBAR CENTRADO
+   NAVBAR (CENTRADO ABSOLUTO)
    ========================================= */
 .n {
   background: linear-gradient(135deg, var(--cs) 0%, var(--cp) 100%);
@@ -48,15 +48,16 @@ body {
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
-  justify-content: space-between; /* Distribuye: Izquierda | Centro | Derecha */
+  justify-content: space-between; /* Logo a la izq, Iconos a la der */
   align-items: center;
+  position: relative; /* Necesario para el centrado absoluto del .mn */
 }
 
 /* Contenedor Izquierdo (Logo) */
 .nl {
-  flex: 1; /* Ocupa espacio para empujar el centro */
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
+  z-index: 10; /* Asegura que el logo esté sobre el menú si se solapan */
 }
 
 .nl img {
@@ -65,29 +66,37 @@ body {
   filter: brightness(1.2);
 }
 
-/* Contenedor Central (Menú de Navegación) */
+/* Contenedor Central (Menú de Navegación) - CENTRADO ABSOLUTO */
 .mn {
   display: flex;
   justify-content: center;
-  flex: 2; /* Le damos más prioridad de espacio al centro */
+  
+  /* Truco de centrado absoluto */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); /* Centrado matemático perfecto */
+  width: auto;
+  z-index: 5;
 }
 
 .mn ul {
   display: flex;
   list-style: none;
-  gap: 1rem;
+  gap: 1.2rem;
 }
 
 .mn ul li a {
   display: block;
   color: var(--cw);
   text-decoration: none;
-  padding: 0.8rem 1.5rem;
+  padding: 0.8rem 1rem;
   transition: var(--t);
   font-weight: 600;
   font-size: 0.95rem;
   letter-spacing: 1px;
   position: relative;
+  text-transform: uppercase; /* Opcional, para consistencia */
 }
 
 .mn ul li a::after {
@@ -103,15 +112,16 @@ body {
 }
 
 .mn ul li a:hover::after {
-  width: 70%;
+  width: 80%;
 }
 
 /* Contenedor Derecho (Iconos Carrito/Favoritos) */
 .ni {
-  flex: 1; /* Ocupa espacio igual al logo para centrar el mn */
   display: flex;
   justify-content: flex-end;
   gap: 1.2rem;
+  align-items: center;
+  z-index: 10;
 }
 
 .ic {
@@ -119,6 +129,10 @@ body {
   position: relative;
   padding: 0.5rem;
   transition: var(--t);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ic svg {
@@ -127,6 +141,11 @@ body {
   stroke: var(--cw);
 }
 
+.ic:hover svg {
+  stroke: var(--ca);
+}
+
+/* Burbujas de Contador */
 .cc, .cf {
   position: absolute;
   top: -2px;
@@ -143,7 +162,8 @@ body {
   font-weight: bold;
 }
 
-.cm { display: none; }
+.cm { display: none; } /* Checkbox para móvil */
+.tm { display: none; } /* Trigger para móvil */
 
 /* =========================================
    HERO SECTION
@@ -212,28 +232,38 @@ body {
 .btn-login:hover { background-color: var(--cp); transform: translateY(-2px); }
 
 /* =========================================
-   RESPONSIVO
+   RESPONSIVO (MÓVIL)
    ========================================= */
 @media (max-width: 992px) {
-  .mn ul { gap: 0.2rem; }
-  .mn ul li a { padding: 0.8rem 1rem; }
+  /* Evita solapamiento en pantallas medianas */
+  .mn { position: static; transform: none; margin: 0 auto; flex: 2; }
+  .nc { position: static; }
 }
 
 @media (max-width: 768px) {
-  .tm { display: flex; margin-left: 1rem; }
+  /* Estilos para el menú hamburguesa */
+  .tm { display: flex; z-index: 20; }
+  
   .mn {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
-    background: var(--cs);
+    background: linear-gradient(135deg, var(--cs) 0%, var(--cp) 100%);
     max-height: 0;
     overflow: hidden;
-    flex: none;
+    transform: none; /* Desactiva el centrado absoluto en móvil */
+    flex-direction: column;
+    width: 100%;
+    z-index: 15;
     transition: max-height 0.3s ease;
   }
-  .cm:checked ~ .mn { max-height: 400px; }
-  .mn ul { flex-direction: column; padding: 1rem 0; align-items: center; }
   
-  .nl, .ni { flex: 1; }
+  .cm:checked ~ .mn { max-height: 400px; }
+  
+  .mn ul { flex-direction: column; padding: 2rem 0; align-items: center; gap: 0; }
+  .mn ul li a { padding: 1.2rem; text-align: center; font-size: 1.1rem; }
+  
+  .ni { flex: none; gap: 0.8rem; }
+  .nl img { height: 40px; }
 }
