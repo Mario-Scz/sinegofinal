@@ -35,11 +35,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <p><strong>Tipo:</strong> ${libro.tipo}</p>
             <p><strong>Código:</strong> ${libro.codigo}</p>
             <span class="pr">$${precio}</span>
-            <button class="btn-agr" data-id="${libro.id}">Agregar al carrito</button>
+            <button class="btn-agr" data-id="${libro.id}" data-titulo="${libro.titulo}" data-precio="${libro.precio}">Agregar al carrito</button>
           </div>
         `;
 
         grid.appendChild(card);
+      });
+
+      // Agregar eventos a los botones de agregar
+      document.querySelectorAll(".btn-agr").forEach(btn => {
+        btn.addEventListener("click", agregarAlCarrito);
       });
 
     } catch (err) {
@@ -48,6 +53,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Función para agregar al carrito
+  async function agregarAlCarrito(e) {
+    const id = e.target.dataset.id;
+    const titulo = e.target.dataset.titulo;
+    const precio = e.target.dataset.precio;
+    
+    try {
+      const res = await fetch("/api/cart.php?action=add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, tipo: "libro" })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert(`${titulo} agregado al carrito`);
+        actualizarContadorCarrito();
+      } else {
+        alert("Error al agregar al carrito: " + (data.error || "desconocido"));
+      }
+    } catch (err) {
+      alert("Error de conexión: " + err.message);
+    }
+  }
+
+  // Actualizar contador del carrito
+  async function actualizarContadorCarrito() {
+    try {
+      const res = await fetch("/api/cart.php?action=count");
+      const data = await res.json();
+      document.getElementById("cc").textContent = data.total || 0;
+    } catch (err) {
+      console.error("Error al actualizar carrito:", err);
+    }
+  }
+
+  // Filtrar por búsqueda
   buscarInput?.addEventListener("input", e => {
     const termino = e.target.value.toLowerCase();
     const cards = document.querySelectorAll(".pc");
@@ -65,6 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Filtrar por géneros (checkboxes)
   checkboxes.forEach(checkbox => {
     checkbox.addEventListener("change", () => {
       const termino = checkbox.parentElement.querySelector("span").textContent.toLowerCase();
@@ -82,5 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Cargar al inicio
   cargarLibros();
+  actualizarContadorCarrito();
 });

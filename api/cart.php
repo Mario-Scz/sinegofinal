@@ -1,89 +1,124 @@
 <?php
-/**
- * cart.php
- * Gestiona el carrito del usuario autenticado.
- * Recibe JSON {action, product_id, cantidad?}
- * Actions: add, remove, update, list, clear
- */
-header('Content-Type: application/json; charset=utf-8');
-require_once __DIR__ . '/../config/db.php';
+header('Content-Type: application/json');
+require_once "../../config/db.php";
 session_start();
 
-if (!isset($_SESSION['id'])) {
-    echo json_encode(['success' => false, 'message' => 'No autenticado']);
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+// LISTAR CARRITO
+if ($action === 'list') {
+    $stmt = $pdo->query("SELECT * FROM carrito ORDER BY id DESC");
+    $items = $stmt->fetchAll();
+    
+    echo json_encode([
+        'success' => true,
+        'items' => $items
+    ]);
     exit;
 }
 
-$usuario_id = $_SESSION['id'];
-$input = json_decode(file_get_contents('php://input'), true) ?: $_GET;
-action:
-$action = $input['action'] ?? '';
-
-try {
-    switch ($action) {
-        case 'add':
-            $prod = intval($input['product_id'] ?? 0);
-            if (!$prod) {
-                throw new Exception('product_id faltante');
-            }
-            $cant = intval($input['cantidad'] ?? 1);
-            // si existe aumenta cantidad, si no inserta
-            $stmt = $pdo->prepare('SELECT cantidad FROM carrito WHERE usuario_id = ? AND producto_id = ?');
-            $stmt->execute([$usuario_id, $prod]);
-            $row = $stmt->fetch();
-            if ($row) {
-                $stmt = $pdo->prepare('UPDATE carrito SET cantidad = cantidad + ? WHERE usuario_id = ? AND producto_id = ?');
-                $stmt->execute([$cant, $usuario_id, $prod]);
-            } else {
-                $stmt = $pdo->prepare('INSERT INTO carrito (usuario_id, producto_id, cantidad) VALUES (?, ?, ?)');
-                $stmt->execute([$usuario_id, $prod, $cant]);
-            }
-            echo json_encode(['success' => true]);
-            break;
-
-        case 'remove':
-            $prod = intval($input['product_id'] ?? 0);
-            if (!$prod) throw new Exception('product_id faltante');
-            $stmt = $pdo->prepare('DELETE FROM carrito WHERE usuario_id = ? AND producto_id = ?');
-            $stmt->execute([$usuario_id, $prod]);
-            echo json_encode(['success' => true]);
-            break;
-
-        case 'update':
-            $prod = intval($input['product_id'] ?? 0);
-            $cant = intval($input['cantidad'] ?? 1);
-            if (!$prod) throw new Exception('product_id faltante');
-            if ($cant < 1) {
-                $stmt = $pdo->prepare('DELETE FROM carrito WHERE usuario_id = ? AND producto_id = ?');
-                $stmt->execute([$usuario_id, $prod]);
-            } else {
-                $stmt = $pdo->prepare('UPDATE carrito SET cantidad = ? WHERE usuario_id = ? AND producto_id = ?');
-                $stmt->execute([$cant, $usuario_id, $prod]);
-            }
-            echo json_encode(['success' => true]);
-            break;
-
-        case 'list':
-            $stmt = $pdo->prepare('SELECT p.id, p.nombre, p.precio, c.cantidad
-                                   FROM carrito c
-                                   JOIN productos p ON p.id = c.producto_id
-                                   WHERE c.usuario_id = ?');
-            $stmt->execute([$usuario_id]);
-            $items = $stmt->fetchAll();
-            echo json_encode(['success' => true, 'items' => $items]);
-            break;
-
-        case 'clear':
-            $stmt = $pdo->prepare('DELETE FROM carrito WHERE usuario_id = ?');
-            $stmt->execute([$usuario_id]);
-            echo json_encode(['success' => true]);
-            break;
-
-        default:
-            echo json_encode(['success' => false, 'message' => 'Acción inválida']);
-            break;
+// AGREGAR AL CARRITO
+if ($action === 'add') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!$input || !isset($input['id'])) {
+        echo json_encode(['success' => false, 'error' => 'Datos inválidos']);
+        exit;
     }
-} catch (Exception $e) {
-    error_log($e->getMessage());
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    
+    $id = $input['id'];
+    $tipo = $input['tipo'] ?? 'libro';
+    
+    try {
+        // Verificar si ya está en el carrito
+        $stmt = $pdo->prepare("SELECT * FROM carrito WHERE id_libro = ? AND tipo = ?");
+        $stmt->execute([$id, $tipo]);
+        $existe = $stmt->fetch();
+        
+        if ($existe) {
+            // Si ya existe, aumentar cantidad
+            $nuevaCantidad = $existe['cantidad'] + 1;
+            $stmt = $pdo->prepare("UPDATE carrito SET cantidad = ? WHERE id_libro = ? AND tipo = ?");
+            $stmt->execute([$nuevaCantidad, $id, $tipo]);
+        } else {
+            // Si no existe, agregar nuevo
+            $stmt = $pdo->prepare("INSERT INTO carrito (id_libro, tipo, cantidad) VALUES (?, ?, 1)");
+            $stmt->execute([$id, $tipo]);
+        }
+        
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
 }
+
+// ACTUALIZAR CANTIDAD
+if ($action === 'update') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!$input || !isset($input['product_id']) || !isset($input['cantidad'])) {
+        echo json_encode(['success' => false, 'error' => 'Datos inválidos']);
+        exit;
+    }
+    
+    $id = $input['product_id'];
+    $cantidad = $input['cantidad'];
+    
+    try {
+        $stmt = $pdo->prepare("UPDATE carrito SET cantidad = ? WHERE id = ?");
+        $stmt->execute([$cantidad, $id]);
+        
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// ELIMINAR DEL CARRITO
+if ($action === 'remove') {
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!$input || !isset($input['product_id'])) {
+        echo json_encode(['success' => false, 'error' => 'Datos inválidos']);
+        exit;
+    }
+    
+    $id = $input['product_id'];
+    
+    try {
+        $stmt = $pdo->prepare("DELETE FROM carrito WHERE id = ?");
+        $stmt->execute([$id]);
+        
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// VACIAR CARRITO
+if ($action === 'clear') {
+    try {
+        $stmt = $pdo->query("DELETE FROM carrito");
+        
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// CONTAR ITEMS
+if ($action === 'count') {
+    $stmt = $pdo->query("SELECT SUM(cantidad) as total FROM carrito");
+    $data = $stmt->fetch();
+    
+    echo json_encode(['total' => $data['total'] ?? 0]);
+    exit;
+}
+
+// ERROR
+echo json_encode(['success' => false, 'error' => 'Acción inválida']);
+?>
