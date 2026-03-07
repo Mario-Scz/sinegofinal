@@ -1,16 +1,18 @@
 <?php
-require __DIR__ . '/../config/session_check.php';
+require __DIR__ . '/../config/session_check.php'; // Protege la página
+$pageTitle = "Menú Principal - Sinego";
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Menú Principal - Sinego</title>
+    <title><?= $pageTitle ?></title>
     <link rel="stylesheet" href="/css/menu.css" />
 </head>
 <body>
-<!-- nav -->
+
+<!-- Navbar dinámico -->
 <nav class="n">
   <div class="nc">
     <div class="nl">
@@ -18,22 +20,25 @@ require __DIR__ . '/../config/session_check.php';
         <img src="/img/sinego.png" alt="Sinego Logo" class="lg" />
       </a>
     </div>
+
     <input type="checkbox" id="mchk" class="cm" />
     <label for="mchk" class="tm">
       <span></span>
       <span></span>
       <span></span>
     </label>
+
     <nav class="mn">
       <ul>
         <li><a href="/vistas/bienvenido.php">INICIO</a></li>
         <li><a href="/vistas/imprenta.php">IMPRENTA</a></li>
         <li><a href="/vistas/catalogo.php">CATALOGO</a></li>
-        <li><a href="/vistas/register.php">INICIAR SESIÓN</a></li>
         <li><a href="/vistas/menu.php">MENÚ</a></li>
       </ul>
     </nav>
+
     <div class="ni">
+      <!-- Carrito -->
       <a href="/vistas/cart.php" class="ic" title="Carrito">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="9" cy="21" r="1"></circle>
@@ -42,12 +47,35 @@ require __DIR__ . '/../config/session_check.php';
         </svg>
         <span class="cc" id="cc">0</span>
       </a>
+
+      <!-- Favoritos -->
       <a href="/vistas/favorites.php" class="ic" title="Favoritos">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
         </svg>
         <span class="cf" id="cf">0</span>
       </a>
+
+      <!-- Botón dinámico de sesión -->
+      <?php if (!empty($_SESSION['usuario'])): ?>
+        <a href="/vistas/logout.php" class="ic" title="Cerrar sesión" style="display:flex; align-items:center; gap:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Salir</span>
+        </a>
+      <?php else: ?>
+        <a href="/vistas/register.php" class="ic" title="Iniciar sesión" style="display:flex; align-items:center; gap:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <polyline points="17 11 19 13 23 9"></polyline>
+          </svg>
+          <span>Iniciar sesión</span>
+        </a>
+      <?php endif; ?>
     </div>
   </div>
 </nav>
@@ -116,13 +144,14 @@ require __DIR__ . '/../config/session_check.php';
   </section>
 </main>
 
-<!-- ftr -->
+<!-- Footer -->
 <footer class="ft">
   <div class="ftc">
     <p>&copy; 2026 Sinego. Todos los derechos reservados.</p>
     <p>Tu plataforma integral de servicios.</p>
   </div>
 </footer>
+
 <script src="/js/common.js"></script>
 <script src="/js/menu.js"></script>
 <script src="/js/cart.js"></script>
