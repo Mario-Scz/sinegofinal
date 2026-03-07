@@ -1,19 +1,19 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     inicializarCarrito();
     actualizarContadores();
 });
 
 function inicializarCarrito() {
+    const emptyCart = document.getElementById('emptyCart');
+    const itemsList = document.getElementById('cartItems');
+
     fetch('/api/cart.php?action=list')
         .then(r => r.json())
         .then(data => {
-            const emptyCart = document.getElementById('emptyCart');
-            const itemsList = document.getElementById('cartItems');
-            
             if (data.success && data.items.length > 0) {
                 emptyCart.style.display = 'none';
                 itemsList.style.display = 'block';
-                renderizarItems(data.items);
+                mostrarItemsCarrito(data.items);
                 actualizarResumen(data.items);
             } else {
                 emptyCart.style.display = 'block';
@@ -23,55 +23,63 @@ function inicializarCarrito() {
         });
 }
 
-function renderizarItems(items) {
-    const container = document.getElementById('cartItems');
-    container.innerHTML = items.map(item => `
-        <div class="cart-item" data-id="${item.id}" data-precio="${item.precio}" data-cant="${item.cantidad}">
+function mostrarItemsCarrito(carrito) {
+    const itemsList = document.getElementById('cartItems');
+    itemsList.innerHTML = '';
+
+    carrito.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'cart-item';
+        itemElement.dataset.id = item.id; 
+        itemElement.dataset.cantidad = item.cantidad;
+        itemElement.dataset.precio = item.precio;
+
+        itemElement.innerHTML = `
+            <div class="item-image">📚</div>
             <div class="item-details">
-                <h3>${item.titulo || 'Libro'}</h3>
-                <p>Precio: $${parseFloat(item.precio).toFixed(2)}</p>
+                <h3>${item.titulo || 'Sin título'}</h3>
+                <p>Autor: ${item.autor || 'Sin autor'}</p>
+                <p>Precio unitario: $${parseFloat(item.precio || 0).toFixed(2)}</p>
             </div>
-            <div class="item-price">$${(item.precio * item.cantidad).toFixed(2)}</div>
+            <div class="item-price">
+                $${(parseFloat(item.precio || 0) * item.cantidad).toFixed(2)}
+            </div>
             <div class="item-quantity">
-                <button class="btn-minus">−</button>
-                <input type="number" value="${item.cantidad}" readonly />
-                <button class="btn-plus">+</button>
-                <button class="btn-remove">✕</button>
+                <button class="quantity-btn btn-minus">−</button>
+                <input type="number" class="quantity-input" value="${item.cantidad}" readonly />
+                <button class="quantity-btn btn-plus">+</button>
+                <button class="item-remove btn-remove">✕</button>
             </div>
-        </div>
-    `).join('');
+        `;
+        itemsList.appendChild(itemElement);
+    });
 }
 
-// Delegación de eventos para botones
-document.getElementById('cartItems').addEventListener('click', (e) => {
-    const row = e.target.closest('.cart-item');
-    if (!row) return;
+// MANEJO DE EVENTOS
+document.getElementById('cartItems').addEventListener('click', function(e) {
+    const btn = e.target;
+    const itemRow = btn.closest('.cart-item');
+    if (!itemRow) return;
 
-    const id = row.dataset.id; // Este es el ID de la base de datos
-    const cant = parseInt(row.dataset.cant);
+    const id_fila = itemRow.dataset.id;
+    const cantidad = parseInt(itemRow.dataset.cantidad);
 
-    if (e.target.classList.contains('btn-plus')) {
-        peticionUpdate(id, cant + 1);
-    } else if (e.target.classList.contains('btn-minus') && cant > 1) {
-        peticionUpdate(id, cant - 1);
-    } else if (e.target.classList.contains('btn-remove')) {
-        if (confirm('¿Eliminar producto?')) peticionRemove(id);
+    if (btn.classList.contains('btn-remove')) {
+        if (confirm('¿Eliminar este producto?')) {
+            enviarAccion('remove', { product_id: id_fila });
+        }
+    } else if (btn.classList.contains('btn-minus') && cantidad > 1) {
+        enviarAccion('update', { product_id: id_fila, cantidad: cantidad - 1 });
+    } else if (btn.classList.contains('btn-plus')) {
+        enviarAccion('update', { product_id: id_fila, cantidad: cantidad + 1 });
     }
 });
 
-function peticionUpdate(id, nuevaCant) {
-    fetch('/api/cart.php', {
+function enviarAccion(accion, datos) {
+    fetch(`/api/cart.php?action=${accion}`, {
         method: 'POST',
-        body: JSON.stringify({ action: 'update', product_id: id, cantidad: nuevaCant })
-    })
-    .then(r => r.json())
-    .then(data => data.success && inicializarCarrito());
-}
-
-function peticionRemove(id) {
-    fetch('/api/cart.php', {
-        method: 'POST',
-        body: JSON.stringify({ action: 'remove', product_id: id })
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(datos)
     })
     .then(r => r.json())
     .then(data => {
@@ -82,11 +90,15 @@ function peticionRemove(id) {
     });
 }
 
-function actualizarResumen(items) {
-    let sub = items.reduce((a, b) => a + (b.precio * b.cantidad), 0);
+function actualizarResumen(carrito) {
+    let sub = 0;
+    carrito.forEach(i => sub += (parseFloat(i.precio) * i.cantidad));
+    const tax = sub * 0.10;
+    const tot = sub + tax;
+
     document.getElementById('subtotal').textContent = `$${sub.toFixed(2)}`;
-    document.getElementById('tax').textContent = `$${(sub * 0.1).toFixed(2)}`;
-    document.getElementById('total').textContent = `$${(sub * 1.1).toFixed(2)}`;
+    document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+    document.getElementById('total').textContent = `$${tot.toFixed(2)}`;
 }
 
 function actualizarContadores() {
@@ -95,4 +107,15 @@ function actualizarContadores() {
         .then(data => {
             document.querySelectorAll('#cc').forEach(el => el.textContent = data.total || 0);
         });
+}
+
+// Botón de pago
+const chkBtn = document.getElementById('chkBtn');
+if (chkBtn) {
+    chkBtn.addEventListener('click', () => {
+        alert('Gracias por su compra. Procesando pedido...');
+        fetch('/api/cart.php?action=clear').then(() => {
+            window.location.href = '/vistas/bienvenido.php';
+        });
+    });
 }
