@@ -32,11 +32,11 @@ body {
 }
 
 /* =========================================
-   NAVBAR (ESTILO MENÚ PRINCIPAL)
+   NAVBAR CENTRADO
    ========================================= */
 .n {
   background: linear-gradient(135deg, var(--cs) 0%, var(--cp) 100%);
-  padding: 1rem 0;
+  padding: 0.8rem 0;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -48,54 +48,46 @@ body {
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* Distribuye: Izquierda | Centro | Derecha */
   align-items: center;
+}
+
+/* Contenedor Izquierdo (Logo) */
+.nl {
+  flex: 1; /* Ocupa espacio para empujar el centro */
+  display: flex;
+  justify-content: flex-start;
 }
 
 .nl img {
   height: 50px;
   width: auto;
   filter: brightness(1.2);
-  transition: var(--t);
 }
 
-.cm {
-  display: none;
+/* Contenedor Central (Menú de Navegación) */
+.mn {
+  display: flex;
+  justify-content: center;
+  flex: 2; /* Le damos más prioridad de espacio al centro */
 }
 
-/* Menú Hamburguesa */
-.tm {
-  display: none;
-  flex-direction: column;
-  cursor: pointer;
-  gap: 0.4rem;
-}
-
-.tm span {
-  width: 28px;
-  height: 3px;
-  background-color: var(--cw);
-  border-radius: 2px;
-  transition: var(--t);
-}
-
-/* Enlaces del Menú */
 .mn ul {
   display: flex;
   list-style: none;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .mn ul li a {
   display: block;
   color: var(--cw);
   text-decoration: none;
-  padding: 0.8rem 1.2rem;
+  padding: 0.8rem 1.5rem;
   transition: var(--t);
-  font-weight: 500;
-  position: relative;
-  font-size: 0.9rem;
+  font-weight: 600;
+  font-size: 0.95rem;
   letter-spacing: 1px;
+  position: relative;
 }
 
 .mn ul li a::after {
@@ -111,45 +103,34 @@ body {
 }
 
 .mn ul li a:hover::after {
-  width: 80%;
+  width: 70%;
 }
 
-/* Iconos de Interacción (Carrito, Favoritos, Login) */
+/* Contenedor Derecho (Iconos Carrito/Favoritos) */
 .ni {
+  flex: 1; /* Ocupa espacio igual al logo para centrar el mn */
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  justify-content: flex-end;
+  gap: 1.2rem;
 }
 
 .ic {
   color: var(--cw);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
-  padding: 0.6rem;
-  border-radius: 50px; /* Redondeado para botones con texto */
+  padding: 0.5rem;
   transition: var(--t);
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.ic:hover {
-  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .ic svg {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   stroke: var(--cw);
 }
 
-/* Contadores (Burbujas Rojas) */
 .cc, .cf {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -2px;
+  right: -2px;
   background-color: #e74c3c;
   color: white;
   border-radius: 50%;
@@ -160,38 +141,28 @@ body {
   justify-content: center;
   font-size: 10px;
   font-weight: bold;
-  border: 2px solid var(--cp);
 }
 
+.cm { display: none; }
+
 /* =========================================
-   HERO SECTION (Título de la página)
+   HERO SECTION
    ========================================= */
 .h {
   background: linear-gradient(135deg, var(--cs) 0%, var(--cp) 100%);
   color: var(--cw);
-  padding: 60px 2rem;
+  padding: 80px 2rem;
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
-.h::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(179, 209, 205, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 80%, rgba(179, 209, 205, 0.1) 0%, transparent 50%);
-}
-
 .hc { position: relative; z-index: 1; }
-.ht { font-size: 2.8rem; font-weight: 700; margin-bottom: 0.5rem; }
-.hs { font-size: 1.1rem; opacity: 0.9; font-weight: 300; }
+.ht { font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; }
+.hs { font-size: 1.2rem; opacity: 0.9; }
 
 /* =========================================
-   LOGIN CARD & WRAPPER
+   LOGIN CARD
    ========================================= */
 .login-wrapper {
   min-height: 60vh;
@@ -203,86 +174,66 @@ body {
 
 .login-card {
   background: var(--cw);
-  padding: 2.5rem;
+  padding: 3rem;
   border-radius: 16px;
   box-shadow: var(--sl);
   width: 100%;
-  max-width: 420px;
+  max-width: 450px;
   border-top: 5px solid var(--cp);
-  animation: fadeIn 0.5s ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.login-logo { text-align: center; margin-bottom: 2rem; }
+.login-logo img { height: 80px; }
 
-.login-logo { text-align: center; margin-bottom: 1.5rem; }
-.login-logo img { height: 70px; width: auto; }
+.login-card h2 { color: var(--cs); text-align: center; margin-bottom: 1.5rem; }
 
-.login-card h2 { color: var(--cs); font-size: 1.8rem; text-align: center; margin-bottom: 0.5rem; }
-.login-subtitle { color: var(--ct); text-align: center; margin-bottom: 2rem; opacity: 0.6; font-size: 0.9rem; }
-
-/* Formulario */
-.login-frm { display: grid; gap: 1.2rem; }
+.login-frm { display: grid; gap: 1.5rem; }
 .fm-grp { display: flex; flex-direction: column; gap: 0.5rem; }
-.fm-grp label { font-weight: 600; color: var(--cs); font-size: 0.9rem; }
+.fm-grp label { font-weight: 600; color: var(--cs); }
 .fm-grp input {
-  padding: 12px 15px;
-  border: 2px solid #eee;
+  padding: 14px;
+  border: 2px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
-  transition: var(--t);
-  outline: none;
 }
-.fm-grp input:focus { border-color: var(--cp); box-shadow: 0 0 0 3px rgba(29, 120, 116, 0.1); }
 
 .btn-login {
   background-color: var(--cs);
   color: var(--cw);
-  padding: 14px;
+  padding: 15px;
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
   font-weight: 700;
   cursor: pointer;
   transition: var(--t);
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: 10px;
 }
-.btn-login:hover { background-color: var(--cp); transform: translateY(-2px); box-shadow: var(--sm); }
 
-.login-note {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: #f9f9f9;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  border-left: 3px solid var(--ca);
-}
+.btn-login:hover { background-color: var(--cp); transform: translateY(-2px); }
 
 /* =========================================
-   DISEÑO RESPONSIVO
+   RESPONSIVO
    ========================================= */
+@media (max-width: 992px) {
+  .mn ul { gap: 0.2rem; }
+  .mn ul li a { padding: 0.8rem 1rem; }
+}
+
 @media (max-width: 768px) {
-  .tm { display: flex; }
+  .tm { display: flex; margin-left: 1rem; }
   .mn {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
     background: var(--cs);
-    flex-direction: column;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease-in-out;
+    flex: none;
+    transition: max-height 0.3s ease;
   }
-  .cm:checked ~ .mn { max-height: 350px; }
-  .mn ul { flex-direction: column; padding: 1rem 0; }
-  .mn ul li a { text-align: center; padding: 1rem; }
+  .cm:checked ~ .mn { max-height: 400px; }
+  .mn ul { flex-direction: column; padding: 1rem 0; align-items: center; }
   
-  .ni { gap: 0.5rem; }
-  .ic span { display: none; } /* Oculta texto "Salir/Entrar" en móvil */
-  
-  .ht { font-size: 2rem; }
+  .nl, .ni { flex: 1; }
 }
