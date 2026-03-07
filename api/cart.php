@@ -1,6 +1,17 @@
 <?php
 header('Content-Type: application/json');
-require_once "../../config/db.php";
+header('Access-Control-Allow-Origin: *');
+
+// Desactivar errores HTML en la salida
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
+try {
+    require_once "../../config/db.php";
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'error' => 'Error de conexión: ' . $e->getMessage()]);
+    exit;
+}
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
