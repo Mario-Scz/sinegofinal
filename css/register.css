@@ -29,7 +29,37 @@ body {
   line-height: 1.6;
 }
 
-/* Barra de Navegación (solo ajustada .mn) */
+/* Navbar idéntico al menú */
+.n {
+  background: linear-gradient(135deg, var(--cs) 0%, var(--cp) 100%);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--sm);
+}
+
+.nc {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nl {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nl img {
+  height: 50px;
+  width: auto;
+  filter: brightness(1.2);
+}
+
 .mn {
   display: flex;
   justify-content: center;
@@ -38,7 +68,6 @@ body {
 .mn ul {
   display: flex;
   list-style: none;
-  gap: 0;
 }
 
 .mn ul li {
@@ -74,9 +103,36 @@ body {
   width: 100%;
 }
 
-/* Login Card Original */
+/* Hero Section centrado como menú */
+.d {
+  background: linear-gradient(135deg, var(--cs) 0%, var(--cp) 100%);
+  color: var(--cw);
+  min-height: calc(100vh - 80px); /* navbar sticky 80px aprox */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.hc {
+  max-width: 600px;
+}
+
+.ht {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.hs {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+/* Login Card */
 .login-wrapper {
-  min-height: calc(100vh - 200px);
+  min-height: calc(100vh - 300px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,7 +264,7 @@ body {
   color: var(--cs);
 }
 
-/* Responsive para nav */
+/* Responsive para nav y login */
 @media (max-width: 768px) {
   .mn {
     flex-direction: column;
@@ -223,11 +279,18 @@ body {
 
   .mn ul {
     flex-direction: column;
-    gap: 0;
   }
 
   .mn ul li a {
     padding: 1rem;
     text-align: center;
+  }
+
+  .ht {
+    font-size: 2.2rem;
+  }
+
+  .hs {
+    font-size: 1rem;
   }
 }

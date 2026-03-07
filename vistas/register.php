@@ -1,4 +1,4 @@
-<?php
+<?php 
 $pageTitle = 'Iniciar Sesión';
 session_start();
 require __DIR__ . '/../config/db.php';
@@ -15,20 +15,40 @@ $error = '';
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Iniciar Sesión - Sinego</title>
 <link rel="stylesheet" href="/css/register.css">
 </head>
 <body>
 
-<nav class="mn">
+<!-- Navbar -->
+<nav class="n">
+  <div class="nc">
+    <div class="nl">
+      <a href="/vistas/bienvenido.php">
+        <img src="/img/sinego.png" alt="Sinego Logo" class="lg">
+      </a>
+    </div>
+
+    <input type="checkbox" id="mchk" class="cm">
+    <label for="mchk" class="tm">
+      <span></span>
+      <span></span>
+      <span></span>
+    </label>
+
+    <nav class="mn">
       <ul>
         <li><a href="/vistas/bienvenido.php">INICIO</a></li>
         <li><a href="/vistas/imprenta.php">IMPRENTA</a></li>
-        <li><a href="/vistas/catalogo.php">CATALOGO</a></li>
+        <li><a href="/vistas/catalogo.php">CATÁLOGO</a></li>
         <li><a href="/vistas/menu.php">MENÚ</a></li>
       </ul>
     </nav>
+  </div>
+</nav>
 
+<!-- Hero Section -->
 <section class="d">
   <div class="hc">
     <h1 class="ht">Iniciar Sesión</h1>
@@ -36,11 +56,12 @@ $error = '';
   </div>
 </section>
 
+<!-- Login Card -->
 <main class="login-wrapper">
   <div class="login-cont">
     <div class="login-card">
       <div class="login-logo">
-        <img src="/img/sinego.png" alt="Sinego" />
+        <img src="/img/sinego.png" alt="Sinego">
       </div>
       <h2>Bienvenido</h2>
       <p class="login-subtitle">Ingresa tus credenciales</p>
@@ -69,6 +90,5 @@ $error = '';
 </main>
 
 <script src="/js/register.js"></script>
-
 </body>
 </html>
