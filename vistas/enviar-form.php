@@ -24,7 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail->Password   = 'uxhh eptj pgmc vxif';           // contraseña de aplicación
         $mail->SMTPSecure = 'tls';
         $mail->Port       = 587;
-        $mail->SMTPDebug  = 0; // 0 = sin debug
+        $mail->SMTPDebug  = 2;       // <-- DEBUG
+        $mail->Debugoutput = 'html';
 
         // Destinatario
         $mail->setFrom('mroberto.drako@gmail.com', 'Sinego Imprenta');
