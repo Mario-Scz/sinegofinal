@@ -16,17 +16,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $mail = new PHPMailer(true);
 
     try {
+        // Configuración SMTP Gmail
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'mroberto.drako@gmail.com'; // Tu correo
-        $mail->Password   = 'uxhh eptj pgmc vxif';    // Contraseña de aplicación
+        $mail->Username   = 'mroberto.drako@gmail.com';        // tu Gmail
+        $mail->Password   = 'uxhh eptj pgmc vxif';           // contraseña de aplicación
         $mail->SMTPSecure = 'tls';
         $mail->Port       = 587;
+        $mail->SMTPDebug  = 0; // 0 = sin debug
 
+        // Destinatario
         $mail->setFrom('mroberto.drako@gmail.com', 'Sinego Imprenta');
-        $mail->addAddress('gustav.arsene@gmail.com'); // correo receptor
+        $mail->addAddress('mroberto.drako@gmail.com'); // donde recibes los mails
 
+        // Contenido del correo
         $mail->isHTML(true);
         $mail->Subject = 'Nueva Cotización de Imprenta';
         $mail->Body    = "
@@ -39,12 +43,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $mail->send();
 
+        // Redirigir al formulario con mensaje de éxito
         header("Location: /vistas/imprenta.php?success=1");
-        exit;
+        exit; // <- MUY IMPORTANTE
 
     } catch (Exception $e) {
+        // Redirigir al formulario con mensaje de error
         header("Location: /vistas/imprenta.php?error=1");
-        exit;
+        exit; // <- MUY IMPORTANTE
     }
 }
 ?>
