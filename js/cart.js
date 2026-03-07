@@ -30,47 +30,52 @@ function mostrarItemsCarrito(carrito) {
     carrito.forEach(item => {
         const itemElement = document.createElement('div');
         itemElement.className = 'cart-item';
-        // Aquí guardamos el ID real de la tabla 'carrito'
         itemElement.dataset.id = item.id; 
         itemElement.dataset.cantidad = item.cantidad;
         itemElement.dataset.precio = item.precio;
 
         itemElement.innerHTML = `
+            <div class="item-image">📚</div>
             <div class="item-details">
-                <h3>${item.titulo}</h3>
-                <p>Precio: $${parseFloat(item.precio).toFixed(2)}</p>
+                <h3>${item.titulo || 'Sin título'}</h3>
+                <p>Autor: ${item.autor || 'Sin autor'}</p>
+                <p>Precio unitario: $${parseFloat(item.precio || 0).toFixed(2)}</p>
             </div>
-            <div class="item-price">$${(item.precio * item.cantidad).toFixed(2)}</div>
+            <div class="item-price">
+                $${(parseFloat(item.precio || 0) * item.cantidad).toFixed(2)}
+            </div>
             <div class="item-quantity">
-                <button class="btn-minus">−</button>
-                <input type="number" value="${item.cantidad}" readonly />
-                <button class="btn-plus">+</button>
-                <button class="btn-remove">✕</button>
+                <button class="quantity-btn btn-minus">−</button>
+                <input type="number" class="quantity-input" value="${item.cantidad}" readonly />
+                <button class="quantity-btn btn-plus">+</button>
+                <button class="item-remove btn-remove">✕</button>
             </div>
         `;
         itemsList.appendChild(itemElement);
     });
 }
 
-// MANEJO DE CLICS EN BOTONES (Eliminar y Unidades)
+// MANEJO DE EVENTOS
 document.getElementById('cartItems').addEventListener('click', function(e) {
     const btn = e.target;
     const itemRow = btn.closest('.cart-item');
     if (!itemRow) return;
 
-    const id_carrito = itemRow.dataset.id;
+    const id_fila = itemRow.dataset.id;
     const cantidad = parseInt(itemRow.dataset.cantidad);
 
     if (btn.classList.contains('btn-remove')) {
-        ejecutarAccion('remove', { product_id: id_carrito });
+        if (confirm('¿Eliminar este producto?')) {
+            enviarAccion('remove', { product_id: id_fila });
+        }
     } else if (btn.classList.contains('btn-minus') && cantidad > 1) {
-        ejecutarAccion('update', { product_id: id_carrito, cantidad: cantidad - 1 });
+        enviarAccion('update', { product_id: id_fila, cantidad: cantidad - 1 });
     } else if (btn.classList.contains('btn-plus')) {
-        ejecutarAccion('update', { product_id: id_carrito, cantidad: cantidad + 1 });
+        enviarAccion('update', { product_id: id_fila, cantidad: cantidad + 1 });
     }
 });
 
-function ejecutarAccion(accion, datos) {
+function enviarAccion(accion, datos) {
     fetch(`/api/cart.php?action=${accion}`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -87,10 +92,13 @@ function ejecutarAccion(accion, datos) {
 
 function actualizarResumen(carrito) {
     let sub = 0;
-    carrito.forEach(i => sub += (i.precio * i.cantidad));
+    carrito.forEach(i => sub += (parseFloat(i.precio) * i.cantidad));
+    const tax = sub * 0.10;
+    const tot = sub + tax;
+
     document.getElementById('subtotal').textContent = `$${sub.toFixed(2)}`;
-    document.getElementById('tax').textContent = `$${(sub * 0.1).toFixed(2)}`;
-    document.getElementById('total').textContent = `$${(sub * 1.1).toFixed(2)}`;
+    document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+    document.getElementById('total').textContent = `$${tot.toFixed(2)}`;
 }
 
 function actualizarContadores() {
@@ -99,4 +107,15 @@ function actualizarContadores() {
         .then(data => {
             document.querySelectorAll('#cc').forEach(el => el.textContent = data.total || 0);
         });
+}
+
+// Botón de pago
+const chkBtn = document.getElementById('chkBtn');
+if (chkBtn) {
+    chkBtn.addEventListener('click', () => {
+        alert('Gracias por su compra. Procesando pedido...');
+        fetch('/api/cart.php?action=clear').then(() => {
+            window.location.href = '/vistas/bienvenido.php';
+        });
+    });
 }
