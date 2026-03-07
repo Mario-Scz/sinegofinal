@@ -262,7 +262,7 @@ body {
 }
 
 .ac:hover {
-  transfrm: translateY(-10px);
+  transform: translateY(-10px);
   box-shadow: var(--sl);
 }
 
@@ -279,7 +279,7 @@ body {
 
 .ac:hover .ia {
   background: linear-gradient(135deg, var(--cp) 0%, var(--cs) 100%);
-  transfrm: scale(1.1);
+  transform: scale(1.1);
 }
 
 .ia img {
@@ -353,7 +353,7 @@ body {
   }
 
   .cm:checked ~ .tm span:nth-child(1) {
-    transfrm: rotate(45deg) translate(10px, 10px);
+    transform: rotate(45deg) translate(10px, 10px);
   }
 
   .cm:checked ~ .tm span:nth-child(2) {
@@ -361,7 +361,7 @@ body {
   }
 
   .cm:checked ~ .tm span:nth-child(3) {
-    transfrm: rotate(-45deg) translate(7px, -7px);
+    transform: rotate(-45deg) translate(7px, -7px);
   }
 
   .mn ul {

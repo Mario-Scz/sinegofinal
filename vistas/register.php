@@ -20,6 +20,15 @@ $error = '';
 </head>
 <body>
 
+<nav class="mn">
+      <ul>
+        <li><a href="/vistas/bienvenido.php">INICIO</a></li>
+        <li><a href="/vistas/imprenta.php">IMPRENTA</a></li>
+        <li><a href="/vistas/catalogo.php">CATALOGO</a></li>
+        <li><a href="/vistas/menu.php">MENÚ</a></li>
+      </ul>
+    </nav>
+
 <section class="d">
   <div class="hc">
     <h1 class="ht">Iniciar Sesión</h1>
