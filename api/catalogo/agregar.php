@@ -3,9 +3,26 @@ header('Content-Type: application/json');
 
 require_once "../../config/db.php";
 
-$input = json_decode(file_get_contents('php://input'), true);
+// Verificar si hay datos en POST o JSON
+if (isset($_FILES['imagen'])) {
+    // Modo con imagen (FormData)
+    $codigo = $_POST['codigo'] ?? '';
+    $autor = $_POST['autor'] ?? '';
+    $titulo = $_POST['titulo'] ?? '';
+    $tipo = $_POST['tipo'] ?? '';
+    $precio = $_POST['precio'] ?? 0.00;
+} else {
+    // Modo sin imagen (JSON)
+    $input = json_decode(file_get_contents('php://input'), true);
+    $codigo = $input['codigo'] ?? '';
+    $autor = $input['autor'] ?? '';
+    $titulo = $input['titulo'] ?? '';
+    $tipo = $input['tipo'] ?? '';
+    $precio = $input['precio'] ?? 0.00;
+}
 
-if (!$input || !isset($input['codigo'], $input['autor'], $input['titulo'], $input['tipo'])) {
+// Validar datos
+if (!$codigo || !$autor || !$titulo || !$tipo) {
     echo json_encode(['error' => 'Datos incompletos']);
     exit;
 }
@@ -42,11 +59,11 @@ try {
     ");
 
     $stmt->execute([
-        $input['codigo'],
-        $input['autor'],
-        $input['titulo'],
-        $input['tipo'],
-        $input['precio'] ?? 0.00,
+        $codigo,
+        $autor,
+        $titulo,
+        $tipo,
+        $precio,
         $imagen
     ]);
 
