@@ -3,13 +3,11 @@ $pageTitle = 'Iniciar Sesión';
 session_start();
 require __DIR__ . '/../config/db.php';
 
-// Si ya hay sesión activa, redirigir al menú
+// Redirigir si ya hay sesión activa
 if (!empty($_SESSION['usuario'])) {
     header('Location: /vistas/menu.php');
     exit;
 }
-
-$error = '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -21,7 +19,7 @@ $error = '';
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- Navbar idéntica a menú -->
 <nav class="n">
   <div class="nc">
     <div class="nl">
@@ -30,7 +28,7 @@ $error = '';
       </a>
     </div>
 
-    <input type="checkbox" id="mchk" class="cm">
+    <input type="checkbox" id="mchk" class="cm" />
     <label for="mchk" class="tm">
       <span></span>
       <span></span>
@@ -45,23 +43,35 @@ $error = '';
         <li><a href="/vistas/menu.php">MENÚ</a></li>
       </ul>
     </nav>
+
+    <div class="ni">
+      <?php if (!empty($_SESSION['usuario'])): ?>
+        <a href="/vistas/logout.php" class="ic" title="Cerrar sesión">
+          <span>Salir</span>
+        </a>
+      <?php else: ?>
+        <a href="/vistas/register.php" class="ic" title="Iniciar sesión">
+          <span>Iniciar sesión</span>
+        </a>
+      <?php endif; ?>
+    </div>
   </div>
 </nav>
 
-<!-- Hero Section -->
-<section class="d">
+<!-- Hero Section para login -->
+<section class="h">
   <div class="hc">
     <h1 class="ht">Iniciar Sesión</h1>
     <p class="hs">Accede a tu cuenta de Sinego</p>
   </div>
 </section>
 
-<!-- Login Card -->
+<!-- Login Card centrado -->
 <main class="login-wrapper">
   <div class="login-cont">
     <div class="login-card">
       <div class="login-logo">
-        <img src="/img/sinego.png" alt="Sinego">
+        <img src="/img/sinego.png" alt="Sinego" />
       </div>
       <h2>Bienvenido</h2>
       <p class="login-subtitle">Ingresa tus credenciales</p>
