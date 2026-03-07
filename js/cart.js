@@ -3,6 +3,69 @@ document.addEventListener('DOMContentLoaded', function() {
     actualizarContadores();
 });
 
+// Funciones globales para los botones
+window.cambiarCantidad = function(index, cantidad) {
+    fetch('/api/cart.php?action=list')
+        .then(r => r.text())
+        .then(text => {
+            const data = JSON.parse(text);
+            if (!data.success) return;
+            const carrito = data.items;
+            const item = carrito[index];
+            if (!item) return;
+            const nuevaCantidad = item.cantidad + cantidad;
+            if (nuevaCantidad < 1) return;
+            fetch('/api/cart.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: 'update', product_id: item.id, cantidad: nuevaCantidad })
+            }).then(() => inicializarCarrito());
+        })
+        .catch(err => console.error('Error al cambiar cantidad:', err));
+};
+
+window.cambiarCantidadDirecta = function(index, cantidad) {
+    const cant = parseInt(cantidad);
+    if (cant < 1) return;
+    fetch('/api/cart.php?action=list')
+        .then(r => r.text())
+        .then(text => {
+            const data = JSON.parse(text);
+            if (!data.success) return;
+            const carrito = data.items;
+            const item = carrito[index];
+            if (!item) return;
+            fetch('/api/cart.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ action: 'update', product_id: item.id, cantidad: cant })
+            }).then(() => inicializarCarrito());
+        })
+        .catch(err => console.error('Error al cambiar cantidad directa:', err));
+};
+
+window.eliminarDelCarrito = function(index) {
+    if (confirm('¿Estás seguro de que deseas eliminar este item?')) {
+        fetch('/api/cart.php?action=list')
+            .then(r => r.text())
+            .then(text => {
+                const data = JSON.parse(text);
+                if (!data.success) return;
+                const item = data.items[index];
+                if (!item) return;
+                fetch('/api/cart.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ action: 'remove', product_id: item.id })
+                }).then(() => {
+                    alert(`${item.titulo} removido del carrito`);
+                    inicializarCarrito();
+                });
+            })
+            .catch(err => console.error('Error al eliminar:', err));
+    }
+};
+
 function inicializarCarrito() {
     const emptyCart = document.getElementById('emptyCart');
     const itemsList = document.getElementById('cartItems');
@@ -29,12 +92,10 @@ function inicializarCarrito() {
                 }
             } catch (e) {
                 console.error('Error al parsear JSON:', text);
-                
             }
         })
         .catch(err => {
             console.error('Error de red:', err);
-            alert("Error al cargar el carrito: " + err.message);
         });
 }
 
@@ -64,65 +125,6 @@ function mostrarItemsCarrito(carrito) {
         `;
         itemsList.appendChild(itemElement);
     });
-}
-
-function cambiarCantidad(index, cantidad) {
-    fetch('/api/cart.php?action=list')
-        .then(r => r.text())
-        .then(text => {
-            const data = JSON.parse(text);
-            if (!data.success) return;
-            const carrito = data.items;
-            const item = carrito[index];
-            if (!item) return;
-            const nuevaCantidad = item.cantidad + cantidad;
-            if (nuevaCantidad < 1) return;
-            fetch('/api/cart.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ action: 'update', product_id: item.id, cantidad: nuevaCantidad })
-            }).then(() => inicializarCarrito());
-        });
-}
-
-function cambiarCantidadDirecta(index, cantidad) {
-    const cant = parseInt(cantidad);
-    if (cant < 1) return;
-    fetch('/api/cart.php?action=list')
-        .then(r => r.text())
-        .then(text => {
-            const data = JSON.parse(text);
-            if (!data.success) return;
-            const carrito = data.items;
-            const item = carrito[index];
-            if (!item) return;
-            fetch('/api/cart.php', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ action: 'update', product_id: item.id, cantidad: cant })
-            }).then(() => inicializarCarrito());
-        });
-}
-
-function eliminarDelCarrito(index) {
-    if (confirm('¿Estás seguro de que deseas eliminar este item?')) {
-        fetch('/api/cart.php?action=list')
-            .then(r => r.text())
-            .then(text => {
-                const data = JSON.parse(text);
-                if (!data.success) return;
-                const item = data.items[index];
-                if (!item) return;
-                fetch('/api/cart.php', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ action: 'remove', product_id: item.id })
-                }).then(() => {
-                    alert(`${item.titulo} removido del carrito`);
-                    inicializarCarrito();
-                });
-            });
-    }
 }
 
 function actualizarResumen(carrito) {
@@ -169,7 +171,9 @@ function actualizarContadores() {
                 console.error('Error al parsear contador:', text);
             }
         })
-        .catch(err => console.error('Error contadores:', err));
+        .catch(err => {
+            console.error('Error contadores:', err);
+        });
 }
 
-setInterval(actualizarContadores, 500);
+setInterval(actualizarContadores, 2000);
