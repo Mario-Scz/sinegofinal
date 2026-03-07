@@ -1,12 +1,5 @@
 <?php
-$pageTitle = 'Administración - Agregar Usuario';
-session_start();
-
-// Validar sesión de administrador
-if (empty($_SESSION['usuario'])) {
-    header('Location: /vistas/register.php');
-    exit;
-}
+require __DIR__ . '/../config/session_check.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
