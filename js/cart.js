@@ -83,7 +83,15 @@ function actualizarCantidad(itemId, nuevaCantidad, titulo) {
                 itemRow.dataset.cantidad = nuevaCantidad;
                 const precio = parseFloat(itemRow.dataset.precio);
                 itemRow.querySelector('.item-price').textContent = `$${(precio * nuevaCantidad).toFixed(2)}`;
-                actualizarResumen(JSON.parse(JSON.stringify(carritoActual)));
+                // Actualizar resumen después de cambiar cantidad
+                fetch('/api/cart.php?action=list')
+                    .then(r => r.text())
+                    .then(text => {
+                        const data = JSON.parse(text);
+                        if (data.success) {
+                            actualizarResumen(data.items);
+                        }
+                    });
             }
         }
     })
@@ -101,6 +109,7 @@ function eliminarItem(itemId, titulo) {
         if (data.success) {
             alert(`${titulo} removido del carrito`);
             inicializarCarrito();
+            actualizarContadores(); // Aquí actualizamos el contador en tiempo real
         }
     })
     .catch(err => console.error('Error al eliminar:', err));
@@ -155,6 +164,7 @@ function actualizarContadores() {
         });
 }
 
+// Actualizar contadores cada 2 segundos
 setInterval(actualizarContadores, 2000);
 
 // EVENT DELEGATION - Manejo de botones
