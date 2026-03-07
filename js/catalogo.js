@@ -24,16 +24,20 @@ document.addEventListener("DOMContentLoaded", () => {
         card.dataset.autor = libro.autor.toLowerCase();
         card.dataset.tipo = libro.tipo.toLowerCase();
 
+        // Formatear precio
+        const precio = libro.precio ? parseFloat(libro.precio).toFixed(2) : "0.00";
+        const imagen = libro.imagen ? libro.imagen : "/img/ejemplos.png";
+
         card.innerHTML = `
           <div class="pi">
-            <img src="/img/ejemplos.png" alt="${libro.titulo}">
+            <img src="${imagen}" alt="${libro.titulo}" onerror="this.src='/img/ejemplos.png'">
           </div>
           <div class="pf">
             <h3>${libro.titulo}</h3>
             <p><strong>Autor:</strong> ${libro.autor}</p>
             <p><strong>Tipo:</strong> ${libro.tipo}</p>
             <p><strong>Código:</strong> ${libro.codigo}</p>
-            <span class="pr">$${libro.precio || "0.00"}</span>
+            <span class="pr">$${precio}</span>
             <button class="btn-agr" data-id="${libro.id}">Agregar al carrito</button>
           </div>
         `;
@@ -41,49 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
         grid.appendChild(card);
       });
 
-      // Agregar eventos a los botones de agregar
-      document.querySelectorAll(".btn-agr").forEach(btn => {
-        btn.addEventListener("click", agregarAlCarrito);
-      });
-
     } catch (err) {
       console.error("Error al cargar libros:", err);
       grid.innerHTML = "<p style='text-align:center; padding:20px; color:red;'>Error al cargar los libros</p>";
-    }
-  }
-
-  // Función para agregar al carrito
-  async function agregarAlCarrito(e) {
-    const id = e.target.dataset.id;
-    
-    try {
-      const res = await fetch("/api/carrito/agregar.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, tipo: "libro" })
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        alert("Libro agregado al carrito");
-        actualizarContadorCarrito();
-      } else {
-        alert("Error al agregar al carrito: " + (data.error || "desconocido"));
-      }
-    } catch (err) {
-      alert("Error de conexión: " + err.message);
-    }
-  }
-
-  // Actualizar contador del carrito
-  async function actualizarContadorCarrito() {
-    try {
-      const res = await fetch("/api/carrito/contar.php");
-      const data = await res.json();
-      document.getElementById("cc").textContent = data.total || 0;
-    } catch (err) {
-      console.error("Error al actualizar carrito:", err);
     }
   }
 
@@ -125,5 +89,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Cargar al inicio
   cargarLibros();
-  actualizarContadorCarrito();
 });
